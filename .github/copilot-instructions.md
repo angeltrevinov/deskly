@@ -1,23 +1,23 @@
-# Deskly LLM Rules
+# Reglas LLM de Deskly
 
-These instructions apply to the entire workspace.
+Estas instrucciones aplican a todo el workspace.
 
-## Decision policy (mandatory)
-- Every relevant decision must be recorded in [DECISIONS.md](../DECISIONS.md).
-- Before closing a relevant decision, explicitly ask for and record the why.
-- If an LLM suggestion is accepted without full understanding, state it explicitly.
-- Coverage: architecture, implementation, and testing decisions. Exclude trivial changes.
+## Politica de decisiones (obligatoria)
+- Toda decision relevante debe registrarse en [DECISIONES.md](../DECISIONES.md).
+- Antes de cerrar una decision relevante, pedir y registrar explicitamente el por que.
+- Si una sugerencia del LLM se acepta sin entenderla completamente, declararlo.
+- Cobertura: arquitectura, implementacion y testing. Excluir cambios triviales.
 
-## Required decision format
-Use this exact format for new entries in [DECISIONS.md](../DECISIONS.md):
+## Formato obligatorio de decision
+Usar exactamente este formato para nuevas entradas en [DECISIONES.md](../DECISIONES.md):
 
-###[Decision] Short title
-**Context:** what problem was being solved.
-**LLM usage:** what was asked and why (or "without LLM").
-**Model output:** summary of what it proposed.
-**My decision:** what I accepted, modified, or discarded, and by what criteria.
-**Rejected alternative:** what it was and why it was rejected.
+###[Decisión] Título breve
+**Contexto:** qué problema estaba resolviendo.
+**Uso de LLM:** qué le pedí y por qué (o "sin LLM").
+**Salida del modelo:** resumen de lo que propuso.
+**Mi decisión:** qué acepté, modifiqué o descarté, y con qué criterio.
+**Alternativa descartada:** cuál era y por qué no.
 
-## Rule source
-- Versioned rules: [RULES.md](../RULES.md)
-- Decision history log: [DECISIONS.md](../DECISIONS.md)
+## Fuente de reglas
+- Reglas versionadas: [RULES.md](../RULES.md)
+- Registro historico de decisiones: [DECISIONES.md](../DECISIONES.md)

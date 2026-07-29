@@ -1,32 +1,32 @@
 ---
 name: decision-tracking
 user-invocable: false
-description: "Use when creating, updating, or reviewing project decisions and LLM rationale records. Triggers: decision log, DECISIONS.md, why justification, rationale, accept/modify/discard, alternatives discarded, rule compliance."
+description: "Usar al crear, actualizar o revisar decisiones del proyecto y su fundamento con LLM. Disparadores: registro de decisiones, DECISIONES.md, justificacion del por que, rationale, aceptar/modificar/descartar, alternativas descartadas, cumplimiento de reglas."
 ---
 
-# Decision Tracking Skill
+# Skill de seguimiento de decisiones
 
-## Goal
-Keep clear traceability for relevant decisions and human judgment over LLM outputs.
+## Objetivo
+Mantener trazabilidad clara de decisiones relevantes y del criterio humano frente a salidas de LLM.
 
-## Mandatory rules
-- Record every relevant decision in [DECISIONS.md](../../../DECISIONS.md).
-- Do not close relevant decisions without explicitly recording the why.
-- Declare when a suggestion was accepted without full understanding.
-- Apply to architecture, implementation, and testing decisions (not trivial changes).
+## Reglas obligatorias
+- Registrar toda decision relevante en [DECISIONES.md](../../../DECISIONES.md).
+- No cerrar decisiones relevantes sin registrar el por que explicito.
+- Declarar cuando una sugerencia fue aceptada sin entendimiento completo.
+- Aplicar a arquitectura, implementacion y testing (no a cambios triviales).
 
-## Required output format
-Use this format for each new decision:
+## Formato de salida obligatorio
+Para cada nueva decision usar:
 
-###[Decision] Short title
-**Context:** what problem was being solved.
-**LLM usage:** what was asked and why (or "without LLM").
-**Model output:** summary of what it proposed.
-**My decision:** what I accepted, modified, or discarded, and by what criteria.
-**Rejected alternative:** what it was and why it was rejected.
+###[Decisión] Título breve
+**Contexto:** qué problema estaba resolviendo.
+**Uso de LLM:** qué le pedí y por qué (o "sin LLM").
+**Salida del modelo:** resumen de lo que propuso.
+**Mi decisión:** qué acepté, modifiqué o descarté, y con qué criterio.
+**Alternativa descartada:** cuál era y por qué no.
 
-## Workflow
-1. Identify whether the decision is relevant.
-2. Ask for and capture the why before closing.
-3. Record content using the required format.
-4. Verify consistency with [RULES.md](../../../RULES.md).
+## Flujo
+1. Identificar si la decision es relevante.
+2. Preguntar y capturar el por que antes de cerrar.
+3. Registrar contenido en el formato requerido.
+4. Verificar consistencia con [RULES.md](../../../RULES.md).

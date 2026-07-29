@@ -1,43 +1,43 @@
 # Deskly
 
-Bare-bones starter for a Deskly-style ticketing app with a FastAPI backend, a Next.js frontend, and Docker Compose.
+Base minima para una app de ticketing estilo Deskly con backend en FastAPI, frontend en Next.js y Docker Compose.
 
-## Requirements
+## Requisitos
 
-- Docker and Docker Compose
+- Docker y Docker Compose
 
-## Run
+## Ejecucion
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-If you already have a `.env` file, you can skip the copy step.
+Si ya tienes un archivo `.env`, puedes omitir el paso de copia.
 
-## Development URLs
+## URLs de desarrollo
 
 - Frontend: http://localhost:3000
 - Backend health: http://localhost:8000/health
 
-## What to expect
+## Que esperar
 
-This starter runs two containers:
+Esta base ejecuta dos contenedores:
 
-- `backend`: FastAPI on port 8000
-- `frontend`: Next.js on port 3000
+- `backend`: FastAPI en el puerto 8000
+- `frontend`: Next.js en el puerto 3000
 
-The frontend waits for the backend healthcheck before starting.
+El frontend espera el healthcheck del backend antes de iniciar.
 
-## Stop
+## Detener
 
 ```bash
 docker compose down
 ```
 
-## What is included
+## Que incluye
 
-- FastAPI app with a minimal health endpoint
-- Next.js App Router app with a minimal home page
-- Multi-stage Dockerfiles for both services
-- Docker Compose entrypoint with healthchecks
+- App FastAPI con endpoint de health minimo
+- App Next.js App Router con home minima
+- Dockerfiles multi-stage para ambos servicios
+- Entrypoint de Docker Compose con healthchecks
