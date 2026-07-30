@@ -40,7 +40,7 @@ Todas las rutas de la API empiezan con `/api`.
 
 - `GET /api/health`: ruta exclusiva para comprobar que el backend esta funcionando y puede conectarse a la base de datos.
 - `GET /api/tickets`
-- `GET /api/tickets/{id}`
+- `GET /api/tickets/{ticket_id}`
 - `POST /api/tickets`
 
 ## Migraciones (Alembic)
