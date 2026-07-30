@@ -6,3 +6,5 @@ alembic==1.16.4
 psycopg[binary]==3.2.9
 pytest==8.3.4
 httpx==0.28.1
+ruff==0.12.7
+mypy==1.17.1

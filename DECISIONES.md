@@ -48,3 +48,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** elimino el servicio `db_test` fijo, introdujo `.env.local` y `.env.test`, y configuro `COMPOSE_PROJECT_NAME` distinto por entorno.
 **Mi decisión:** acepte este enfoque para mantener entornos separados y facilitar ejecucion de pruebas en pipeline con configuracion explicita.
 **Alternativa descartada:** mantener dos bases simultaneas en un mismo compose (`db` + `db_test`) con configuracion fija (descartado por complejidad operativa y mayor riesgo de mezcla entre entornos).
+
+###[Decisión] DEC-0005 - CI de PR enfocado primero en backend
+**Contexto:** habia que configurar checks de Pull Request para asegurar calidad automatizada sin bloquear el avance del proyecto.
+**Uso de LLM:** se le pidio a Copilot implementar workflow de GitHub Actions con lint, typecheck, unit tests y build Docker.
+**Salida del modelo:** propuso partir los checks por stack y crear pipeline backend-only en esta fase, dejando frontend para un workflow posterior.
+**Mi decisión:** acepte implementar primero solo backend porque es lo primero que vamos a construir y validar; el criterio fue priorizar cobertura inmediata sobre el codigo que ya existe y esta en desarrollo activo, y agregar frontend cuando empecemos ese trabajo.
+**Alternativa descartada:** incluir desde ahora checks de frontend en el mismo workflow (descartado por prematuro mientras frontend aun no es foco de implementacion).
