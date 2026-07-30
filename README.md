@@ -9,11 +9,13 @@ Base minima para una app de ticketing estilo Deskly con backend en FastAPI, fron
 ## Ejecucion
 
 ```bash
-cp .env.example .env
-docker compose up --build
+docker compose --env-file .env.local up --build
 ```
 
-Si ya tienes un archivo `.env`, puedes omitir el paso de copia.
+Para desarrollo se usa `.env.local`.
+Para pruebas se usa `.env.test`.
+
+Cada entorno define un `COMPOSE_PROJECT_NAME` distinto para aislar contenedores, red y volumenes.
 
 ## URLs de desarrollo
 
@@ -58,6 +60,28 @@ Crear migracion automatica desde modelos:
 
 ```bash
 docker compose run --rm backend alembic revision --autogenerate -m "descripcion_del_cambio"
+```
+
+## Pruebas
+
+Las pruebas del backend usan PostgreSQL con variables de entorno de `.env.test`.
+
+Levantar dependencias para tests:
+
+```bash
+docker compose --env-file .env.test up -d db
+```
+
+Ejecutar pruebas del backend:
+
+```bash
+docker compose --env-file .env.test run --rm backend pytest
+```
+
+Limpieza del entorno de pruebas:
+
+```bash
+docker compose --env-file .env.test down --remove-orphans
 ```
 
 ## Detener
