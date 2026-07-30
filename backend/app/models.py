@@ -45,7 +45,11 @@ class TicketComentario(Base):
     __tablename__ = "ticket_comentarios"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    ticket_id: Mapped[int] = mapped_column(ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False)
+    ticket_id: Mapped[int] = mapped_column(
+        ForeignKey("tickets.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     contenido: Mapped[str] = mapped_column(Text(), nullable=False)
     autor: Mapped[str | None] = mapped_column(String(120), nullable=True)
     creado_en: Mapped[datetime] = mapped_column(

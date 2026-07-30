@@ -38,8 +38,15 @@ def upgrade() -> None:
         ["id"],
         unique=False,
     )
+    op.create_index(
+        op.f("ix_ticket_comentarios_ticket_id"),
+        "ticket_comentarios",
+        ["ticket_id"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
+    op.drop_index(op.f("ix_ticket_comentarios_ticket_id"), table_name="ticket_comentarios")
     op.drop_index(op.f("ix_ticket_comentarios_id"), table_name="ticket_comentarios")
     op.drop_table("ticket_comentarios")
