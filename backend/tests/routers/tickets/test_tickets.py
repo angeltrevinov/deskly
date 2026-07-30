@@ -123,3 +123,40 @@ def test_patch_ticket_rejects_null_in_non_nullable_field(client):
     response = client.patch(f"/api/tickets/{ticket_id}", json={"titulo": None})
 
     assert response.status_code == 422
+
+
+def test_add_comment_to_ticket(client):
+    create_payload = {
+        "titulo": "Ticket con comentarios",
+        "descripcion": "Descripcion base",
+        "prioridad": "medium",
+        "asignado_a": "dev",
+    }
+    create_response = client.post("/api/tickets", json=create_payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    comment_payload = {
+        "contenido": "Primer comentario",
+        "autor": "qa",
+    }
+    comment_response = client.post(f"/api/tickets/{ticket_id}/comentarios", json=comment_payload)
+
+    assert comment_response.status_code == 201
+    comment = comment_response.json()
+    assert comment["ticket_id"] == ticket_id
+    assert comment["contenido"] == comment_payload["contenido"]
+    assert comment["autor"] == comment_payload["autor"]
+    assert "id" in comment
+    assert "creado_en" in comment
+
+
+def test_add_comment_to_ticket_not_found(client):
+    comment_payload = {
+        "contenido": "Comentario huerfano",
+        "autor": "qa",
+    }
+    response = client.post("/api/tickets/999/comentarios", json=comment_payload)
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Ticket no encontrado"}

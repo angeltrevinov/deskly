@@ -62,3 +62,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso un esquema `TicketUpdate` con campos opcionales y validación para rechazar payload vacío, más el handler que aplica solo campos enviados y responde 404 cuando no existe el ticket.
 **Mi decisión:** acepté la propuesta porque reduce riesgo de sobrescritura accidental, mantiene semántica correcta de PATCH y deja cobertura de pruebas para caso exitoso, ticket inexistente y payload vacío.
 **Alternativa descartada:** usar `PUT` con payload completo (descartado porque exige enviar todos los campos y aumenta riesgo de pérdida de datos al actualizar parcialmente).
+
+###[Decisión] DEC-0007 - Endpoint dedicado para comentarios de tickets
+**Contexto:** hacia falta exponer `POST /api/tickets/{id}/comentarios` para registrar comentarios vinculados a un ticket existente.
+**Uso de LLM:** se le pidio a Copilot implementar modelo, migracion, esquema de entrada/salida, ruta y pruebas de integracion para comentarios.
+**Salida del modelo:** propuso una tabla `ticket_comentarios` con `ticket_id` FK y borrado en cascada, un endpoint que valida existencia del ticket y devuelve el comentario creado con `201`.
+**Mi decisión:** acepte este enfoque porque separa responsabilidades entre ticket y comentario, mantiene integridad referencial en DB y deja trazabilidad con pruebas para caso exitoso y ticket inexistente.
+**Alternativa descartada:** guardar comentarios embebidos en un campo de texto del ticket (descartado por baja trazabilidad y dificultad para consultar/ordenar comentarios individualmente).

@@ -44,3 +44,18 @@ class TicketRead(BaseModel):
     actualizado_en: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TicketCommentCreate(BaseModel):
+    contenido: str = Field(min_length=1, max_length=4000)
+    autor: str | None = Field(default=None, max_length=120)
+
+
+class TicketCommentRead(BaseModel):
+    id: int
+    ticket_id: int
+    contenido: str
+    autor: str | None
+    creado_en: datetime
+
+    model_config = {"from_attributes": True}
