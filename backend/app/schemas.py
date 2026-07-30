@@ -1,8 +1,15 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models import TicketEstado
+
+
+class TicketCreate(BaseModel):
+    titulo: str = Field(min_length=1, max_length=160)
+    descripcion: str | None = None
+    prioridad: str = Field(default="medium", max_length=32)
+    asignado_a: str | None = Field(default=None, max_length=120)
 
 
 class TicketRead(BaseModel):

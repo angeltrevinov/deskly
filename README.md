@@ -18,7 +18,7 @@ Si ya tienes un archivo `.env`, puedes omitir el paso de copia.
 ## URLs de desarrollo
 
 - Frontend: http://localhost:3000
-- Backend health: http://localhost:8000/health
+- Backend health: http://localhost:8000/api/health
 - PostgreSQL: localhost:5432
 
 ## Que esperar
@@ -31,6 +31,14 @@ Esta base ejecuta tres contenedores:
 
 El backend espera el healthcheck de PostgreSQL antes de iniciar.
 El frontend espera el healthcheck del backend antes de iniciar.
+
+## API
+
+Todas las rutas de la API empiezan con `/api`.
+
+- `GET /api/health`: ruta exclusiva para comprobar que el backend esta funcionando y puede conectarse a la base de datos.
+- `GET /api/tickets`
+- `POST /api/tickets`
 
 ## Migraciones (Alembic)
 
