@@ -56,6 +56,13 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Mi decisión:** acepte implementar primero solo backend porque es lo primero que vamos a construir y validar; el criterio fue priorizar cobertura inmediata sobre el codigo que ya existe y esta en desarrollo activo, y agregar frontend cuando empecemos ese trabajo.
 **Alternativa descartada:** incluir desde ahora checks de frontend en el mismo workflow (descartado por prematuro mientras frontend aun no es foco de implementacion).
 
+###[Decisión] DEC-0006 - Actualización parcial de tickets con PATCH
+**Contexto:** hacía falta exponer `PATCH /api/tickets/{id}` para actualizar campos de un ticket sin reemplazar el recurso completo.
+**Uso de LLM:** se le pidió a Copilot implementar la ruta, validaciones y pruebas de actualización parcial en el backend FastAPI.
+**Salida del modelo:** propuso un esquema `TicketUpdate` con campos opcionales y validación para rechazar payload vacío, más el handler que aplica solo campos enviados y responde 404 cuando no existe el ticket.
+**Mi decisión:** acepté la propuesta porque reduce riesgo de sobrescritura accidental, mantiene semántica correcta de PATCH y deja cobertura de pruebas para caso exitoso, ticket inexistente y payload vacío.
+**Alternativa descartada:** usar `PUT` con payload completo (descartado porque exige enviar todos los campos y aumenta riesgo de pérdida de datos al actualizar parcialmente).
+
 ###[Decisión] DEC-0007 - Endpoint dedicado para comentarios de tickets
 **Contexto:** hacia falta exponer `POST /api/tickets/{id}/comentarios` para registrar comentarios vinculados a un ticket existente.
 **Uso de LLM:** se le pidio a Copilot implementar modelo, migracion, esquema de entrada/salida, ruta y pruebas de integracion para comentarios.

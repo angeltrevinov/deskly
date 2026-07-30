@@ -3,7 +3,13 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Ticket, TicketComentario, TicketEstado
-from app.schemas import TicketCommentCreate, TicketCommentRead, TicketCreate, TicketRead
+from app.schemas import (
+    TicketCommentCreate,
+    TicketCommentRead,
+    TicketCreate,
+    TicketRead,
+    TicketUpdate,
+)
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
@@ -57,3 +63,20 @@ def add_ticket_comment(
     db.commit()
     db.refresh(comment)
     return comment
+
+
+@router.patch("/{ticket_id}", response_model=TicketRead)
+def update_ticket(
+    ticket_id: int,
+    payload: TicketUpdate,
+    db: Session = Depends(get_db),
+) -> Ticket:
+    ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
+
+    changes = payload.model_dump(exclude_unset=True)
+    for field, value in changes.items():
+        setattr(ticket, field, value)
+
+    db.commit()
+    db.refresh(ticket)
+    return ticket
