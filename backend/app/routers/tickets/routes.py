@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -25,4 +25,12 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticke
     db.add(ticket)
     db.commit()
     db.refresh(ticket)
+    return ticket
+
+
+@router.get("/{ticket_id}", response_model=TicketRead)
+def get_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado")
     return ticket

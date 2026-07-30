@@ -23,3 +23,34 @@ def test_create_and_list_tickets(client):
     tickets = list_response.json()
     assert len(tickets) == 1
     assert tickets[0]["titulo"] == payload["titulo"]
+
+
+def test_get_ticket_detail(client):
+    payload = {
+        "titulo": "Ticket detalle",
+        "descripcion": "Detalle del ticket",
+        "prioridad": "high",
+        "asignado_a": "qa",
+    }
+
+    create_response = client.post("/api/tickets", json=payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    detail_response = client.get(f"/api/tickets/{ticket_id}")
+
+    assert detail_response.status_code == 200
+    ticket = detail_response.json()
+    assert ticket["id"] == ticket_id
+    assert ticket["titulo"] == payload["titulo"]
+    assert ticket["descripcion"] == payload["descripcion"]
+    assert ticket["prioridad"] == payload["prioridad"]
+    assert ticket["asignado_a"] == payload["asignado_a"]
+    assert ticket["estado"] == "abierto"
+
+
+def test_get_ticket_detail_not_found(client):
+    response = client.get("/api/tickets/999")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Ticket no encontrado"}
