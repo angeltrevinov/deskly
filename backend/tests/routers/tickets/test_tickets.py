@@ -54,3 +54,56 @@ def test_get_ticket_detail_not_found(client):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Ticket no encontrado"}
+
+
+def test_patch_ticket_updates_selected_fields(client):
+    create_payload = {
+        "titulo": "Ticket original",
+        "descripcion": "Descripcion original",
+        "prioridad": "medium",
+        "asignado_a": "dev1",
+    }
+    create_response = client.post("/api/tickets", json=create_payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    patch_payload = {
+        "titulo": "Ticket actualizado",
+        "estado": "en_progreso",
+        "asignado_a": "dev2",
+    }
+    patch_response = client.patch(f"/api/tickets/{ticket_id}", json=patch_payload)
+
+    assert patch_response.status_code == 200
+    patched_ticket = patch_response.json()
+    assert patched_ticket["id"] == ticket_id
+    assert patched_ticket["titulo"] == "Ticket actualizado"
+    assert patched_ticket["descripcion"] == "Descripcion original"
+    assert patched_ticket["prioridad"] == "medium"
+    assert patched_ticket["estado"] == "en_progreso"
+    assert patched_ticket["asignado_a"] == "dev2"
+
+
+def test_patch_ticket_not_found(client):
+    patch_payload = {"titulo": "No existe"}
+
+    response = client.patch("/api/tickets/999", json=patch_payload)
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Ticket no encontrado"}
+
+
+def test_patch_ticket_rejects_empty_payload(client):
+    create_payload = {
+        "titulo": "Ticket para validar patch",
+        "descripcion": "Descripcion",
+        "prioridad": "medium",
+        "asignado_a": "dev",
+    }
+    create_response = client.post("/api/tickets", json=create_payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    response = client.patch(f"/api/tickets/{ticket_id}", json={})
+
+    assert response.status_code == 422
