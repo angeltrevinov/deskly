@@ -55,3 +55,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso partir los checks por stack y crear pipeline backend-only en esta fase, dejando frontend para un workflow posterior.
 **Mi decisión:** acepte implementar primero solo backend porque es lo primero que vamos a construir y validar; el criterio fue priorizar cobertura inmediata sobre el codigo que ya existe y esta en desarrollo activo, y agregar frontend cuando empecemos ese trabajo.
 **Alternativa descartada:** incluir desde ahora checks de frontend en el mismo workflow (descartado por prematuro mientras frontend aun no es foco de implementacion).
+
+###[Decisión] DEC-0006 - Actualizacion parcial de tickets con PATCH
+**Contexto:** hacia falta exponer `PATCH /api/tickets/{id}` para actualizar campos de un ticket sin reemplazar el recurso completo.
+**Uso de LLM:** se le pidio a Copilot implementar la ruta, validaciones y pruebas de actualizacion parcial en el backend FastAPI.
+**Salida del modelo:** propuso un esquema `TicketUpdate` con campos opcionales y validacion para rechazar payload vacio, mas el handler que aplica solo campos enviados y responde 404 cuando no existe el ticket.
+**Mi decisión:** acepte la propuesta porque reduce riesgo de sobrescritura accidental, mantiene semantica correcta de PATCH y deja cobertura de pruebas para caso exitoso, ticket inexistente y payload vacio.
+**Alternativa descartada:** usar `PUT` con payload completo (descartado porque exige enviar todos los campos y aumenta riesgo de perdida de datos al actualizar parcialmente).
