@@ -55,3 +55,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso partir los checks por stack y crear pipeline backend-only en esta fase, dejando frontend para un workflow posterior.
 **Mi decisión:** acepte implementar primero solo backend porque es lo primero que vamos a construir y validar; el criterio fue priorizar cobertura inmediata sobre el codigo que ya existe y esta en desarrollo activo, y agregar frontend cuando empecemos ese trabajo.
 **Alternativa descartada:** incluir desde ahora checks de frontend en el mismo workflow (descartado por prematuro mientras frontend aun no es foco de implementacion).
+
+###[Decisión] DEC-0007 - Endpoint dedicado para comentarios de tickets
+**Contexto:** hacia falta exponer `POST /api/tickets/{id}/comentarios` para registrar comentarios vinculados a un ticket existente.
+**Uso de LLM:** se le pidio a Copilot implementar modelo, migracion, esquema de entrada/salida, ruta y pruebas de integracion para comentarios.
+**Salida del modelo:** propuso una tabla `ticket_comentarios` con `ticket_id` FK y borrado en cascada, un endpoint que valida existencia del ticket y devuelve el comentario creado con `201`.
+**Mi decisión:** acepte este enfoque porque separa responsabilidades entre ticket y comentario, mantiene integridad referencial en DB y deja trazabilidad con pruebas para caso exitoso y ticket inexistente.
+**Alternativa descartada:** guardar comentarios embebidos en un campo de texto del ticket (descartado por baja trazabilidad y dificultad para consultar/ordenar comentarios individualmente).
