@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Ticket, TicketEstado
-from app.schemas import TicketCreate, TicketRead
+from app.models import Ticket, TicketComentario, TicketEstado
+from app.schemas import TicketCommentCreate, TicketCommentRead, TicketCreate, TicketRead
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
@@ -34,3 +34,24 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
     return ticket
+
+
+@router.post("/{ticket_id}/comentarios", response_model=TicketCommentRead, status_code=201)
+def add_ticket_comment(
+    ticket_id: int,
+    payload: TicketCommentCreate,
+    db: Session = Depends(get_db),
+) -> TicketComentario:
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado")
+
+    comment = TicketComentario(
+        ticket_id=ticket.id,
+        contenido=payload.contenido,
+        autor=payload.autor,
+    )
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return comment
