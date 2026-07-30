@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime
+from enum import Enum
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -14,6 +18,20 @@ from app.schemas import (
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
 
+class TicketSortBy(str, Enum):
+    id = "id"
+    creado_en = "creado_en"
+    actualizado_en = "actualizado_en"
+    prioridad = "prioridad"
+    estado = "estado"
+    asignado_a = "asignado_a"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 def get_ticket_or_404(ticket_id: int, db: Session) -> Ticket:
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if ticket is None:
@@ -22,8 +40,49 @@ def get_ticket_or_404(ticket_id: int, db: Session) -> Ticket:
 
 
 @router.get("", response_model=list[TicketRead])
-def list_tickets(db: Session = Depends(get_db)) -> list[Ticket]:
-    return db.query(Ticket).order_by(Ticket.id.desc()).all()
+def list_tickets(
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    estado: TicketEstado | None = None,
+    prioridad: str | None = Query(default=None, max_length=32),
+    asignado: str | None = Query(default=None, max_length=120),
+    creado_desde: datetime | None = None,
+    creado_hasta: datetime | None = None,
+    actualizado_desde: datetime | None = None,
+    actualizado_hasta: datetime | None = None,
+    sort_by: TicketSortBy = TicketSortBy.creado_en,
+    sort_order: SortOrder = SortOrder.desc,
+    db: Session = Depends(get_db),
+) -> list[Ticket]:
+    query = db.query(Ticket)
+
+    if estado is not None:
+        query = query.filter(Ticket.estado == estado)
+    if prioridad is not None:
+        query = query.filter(Ticket.prioridad == prioridad)
+    if asignado is not None:
+        query = query.filter(Ticket.asignado_a == asignado)
+    if creado_desde is not None:
+        query = query.filter(Ticket.creado_en >= creado_desde)
+    if creado_hasta is not None:
+        query = query.filter(Ticket.creado_en <= creado_hasta)
+    if actualizado_desde is not None:
+        query = query.filter(Ticket.actualizado_en >= actualizado_desde)
+    if actualizado_hasta is not None:
+        query = query.filter(Ticket.actualizado_en <= actualizado_hasta)
+
+    sort_field_map = {
+        TicketSortBy.id: Ticket.id,
+        TicketSortBy.creado_en: Ticket.creado_en,
+        TicketSortBy.actualizado_en: Ticket.actualizado_en,
+        TicketSortBy.prioridad: Ticket.prioridad,
+        TicketSortBy.estado: Ticket.estado,
+        TicketSortBy.asignado_a: Ticket.asignado_a,
+    }
+    sort_column = sort_field_map[sort_by]
+    sort_expression = asc(sort_column) if sort_order == SortOrder.asc else desc(sort_column)
+
+    return query.order_by(sort_expression).offset(offset).limit(limit).all()
 
 
 @router.post("", response_model=TicketRead, status_code=201)
