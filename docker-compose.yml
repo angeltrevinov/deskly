@@ -1,9 +1,30 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-deskly}
+      POSTGRES_USER: ${POSTGRES_USER:-deskly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deskly}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-deskly} -d ${POSTGRES_DB:-deskly}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-deskly}:${POSTGRES_PASSWORD:-deskly}@db:5432/${POSTGRES_DB:-deskly}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')\""]
       interval: 10s
@@ -25,3 +46,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+volumes:
+  postgres_data:
