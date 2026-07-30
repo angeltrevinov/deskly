@@ -107,3 +107,19 @@ def test_patch_ticket_rejects_empty_payload(client):
     response = client.patch(f"/api/tickets/{ticket_id}", json={})
 
     assert response.status_code == 422
+
+
+def test_patch_ticket_rejects_null_in_non_nullable_field(client):
+    create_payload = {
+        "titulo": "Ticket para validar null",
+        "descripcion": "Descripcion",
+        "prioridad": "medium",
+        "asignado_a": "dev",
+    }
+    create_response = client.post("/api/tickets", json=create_payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    response = client.patch(f"/api/tickets/{ticket_id}", json={"titulo": None})
+
+    assert response.status_code == 422

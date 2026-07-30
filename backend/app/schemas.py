@@ -24,6 +24,12 @@ class TicketUpdate(BaseModel):
     def validate_non_empty_payload(self) -> "TicketUpdate":
         if not self.model_fields_set:
             raise ValueError("Debe enviar al menos un campo para actualizar")
+
+        required_field_names = ("titulo", "prioridad", "estado")
+        for field_name in required_field_names:
+            if field_name in self.model_fields_set and getattr(self, field_name) is None:
+                raise ValueError(f"El campo '{field_name}' no permite null")
+
         return self
 
 
