@@ -81,8 +81,9 @@ def list_tickets(
     }
     sort_column = sort_field_map[sort_by]
     sort_expression = asc(sort_column) if sort_order == SortOrder.asc else desc(sort_column)
+    id_tie_breaker = asc(Ticket.id) if sort_order == SortOrder.asc else desc(Ticket.id)
 
-    return query.order_by(sort_expression).offset(offset).limit(limit).all()
+    return query.order_by(sort_expression, id_tie_breaker).offset(offset).limit(limit).all()
 
 
 @router.post("", response_model=TicketRead, status_code=201)

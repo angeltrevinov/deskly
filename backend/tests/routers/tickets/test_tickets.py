@@ -225,6 +225,46 @@ def test_list_tickets_with_date_filters(client):
     assert out_of_range_response.json() == []
 
 
+def test_list_tickets_with_updated_date_filters(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket actualizado por filtro",
+            "descripcion": "Con updated_at",
+            "prioridad": "low",
+            "asignado_a": "maria",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    patch_response = client.patch(
+        f"/api/tickets/{ticket_id}",
+        json={"descripcion": "Descripcion actualizada"},
+    )
+    assert patch_response.status_code == 200
+
+    in_range_response = client.get(
+        "/api/tickets",
+        params={
+            "actualizado_desde": "2000-01-01T00:00:00Z",
+            "actualizado_hasta": "2100-01-01T00:00:00Z",
+        },
+    )
+    assert in_range_response.status_code == 200
+    assert len(in_range_response.json()) == 1
+
+    out_of_range_response = client.get(
+        "/api/tickets",
+        params={
+            "actualizado_desde": "2100-01-02T00:00:00Z",
+            "actualizado_hasta": "2100-01-03T00:00:00Z",
+        },
+    )
+    assert out_of_range_response.status_code == 200
+    assert out_of_range_response.json() == []
+
+
 def test_add_comment_to_ticket(client):
     create_payload = {
         "titulo": "Ticket con comentarios",
