@@ -84,6 +84,30 @@ Cada mensaje tiene el formato:
 }
 ```
 
+## Workflow de estados configurable en DB
+
+Las transiciones de estado de ticket ya no estan hardcodeadas en el backend. Se leen desde tablas de configuracion:
+
+- `ticket_workflow_states`
+- `ticket_workflow_transitions`
+
+Para agregar un estado o transicion nueva no hace falta redeploy del backend; basta actualizar esas tablas.
+
+Ejemplo SQL para agregar una nueva transicion `resuelto -> qa_verificado`:
+
+```sql
+INSERT INTO ticket_workflow_states (codigo, nombre, activo, es_inicial, es_terminal, orden)
+VALUES ('qa_verificado', 'QA verificado', true, false, false, 6)
+ON CONFLICT (codigo) DO NOTHING;
+
+INSERT INTO ticket_workflow_transitions (estado_origen_id, estado_destino_id, activa)
+SELECT s_from.id, s_to.id, true
+FROM ticket_workflow_states s_from
+JOIN ticket_workflow_states s_to
+  ON s_from.codigo = 'resuelto' AND s_to.codigo = 'qa_verificado'
+ON CONFLICT (estado_origen_id, estado_destino_id) DO NOTHING;
+```
+
 ## Migraciones (Alembic)
 
 Aplicar migraciones:

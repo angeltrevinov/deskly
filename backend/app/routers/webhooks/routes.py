@@ -12,9 +12,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Ticket, TicketEstado, TicketWebhookEvent
+from app.models import Ticket, TicketWebhookEvent
 from app.schemas import TicketRead, WebhookTicketIngestRequest
 from app.ticket_event_bus import ticket_ws_manager
+from app.ticket_state_machine import get_initial_ticket_state_code
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -95,12 +96,17 @@ async def ingest_ticket_webhook(
             content={"status": "duplicado", "event_id": payload.event_id},
         )
 
+    try:
+        initial_state = get_initial_ticket_state_code(db)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
     ticket = Ticket(
         titulo=payload.ticket.titulo,
         descripcion=payload.ticket.descripcion,
         prioridad=payload.ticket.prioridad,
         asignado_a=payload.ticket.asignado_a,
-        estado=TicketEstado.ABIERTO,
+        estado=initial_state,
     )
     db.add(ticket)
     db.flush()

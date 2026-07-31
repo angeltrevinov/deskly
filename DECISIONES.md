@@ -118,3 +118,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso validar firma HMAC-SHA256 en tiempo constante sobre `timestamp.raw_body`, aplicar ventana temporal configurable para replay, y persistir eventos procesados en tabla dedicada con `event_id` único para devolver `200` en duplicados sin efectos secundarios.
 **Mi decisión:** acepté este enfoque porque cumple explícitamente los requisitos de seguridad y consistencia, y prioriza una implementación explicable y comprobable con tests de integración. El por qué explícito es reducir riesgo de tickets duplicados o falsificados manteniendo una ruta operable con infraestructura actual.
 **Alternativa descartada:** implementar idempotencia en memoria o cache local por proceso (descartado porque se pierde al reiniciar, no escala entre réplicas y no garantiza consistencia transaccional con la creación del ticket).
+
+###[Decisión] DEC-0015 - Workflow de estados y transiciones persistido en base de datos
+**Contexto:** hacía falta evitar redeploys del backend cada vez que cambiara un estado o una transición de tickets.
+**Uso de LLM:** se le pidió a Copilot proponer e implementar un diseño para desacoplar el workflow de tickets del código y moverlo a una configuración editable.
+**Salida del modelo:** propuso crear tablas `ticket_workflow_states` y `ticket_workflow_transitions`, sembrar reglas iniciales por migración y validar transiciones en runtime consultando DB.
+**Mi decisión:** acepté este diseño porque hoy no hay clientes productivos ni restricciones de compatibilidad, y el por qué explícito es ganar flexibilidad operativa para agregar estados/transiciones sin tocar ni desplegar el backend.
+**Alternativa descartada:** mantener enum y reglas hardcodeadas con feature flags por entorno (descartado porque seguiría requiriendo cambios de código y despliegues ante cada ajuste de workflow).

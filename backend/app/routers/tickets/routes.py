@@ -7,7 +7,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Ticket, TicketComentario, TicketEstado
+from app.models import Ticket, TicketComentario
 from app.schemas import (
     TicketCommentCreate,
     TicketCommentRead,
@@ -19,6 +19,7 @@ from app.schemas import (
 )
 from app.ticket_state_machine import (
     InvalidTicketStateTransitionError,
+    get_initial_ticket_state_code,
     validate_ticket_state_transition,
 )
 from app.ticket_event_bus import ticket_ws_manager
@@ -74,7 +75,7 @@ async def tickets_ws(websocket: WebSocket) -> None:
 def list_tickets(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
-    estado: TicketEstado | None = None,
+    estado: str | None = Query(default=None, min_length=1, max_length=32),
     prioridad: str | None = Query(default=None, max_length=32),
     asignado_a: str | None = Query(default=None, max_length=120),
     creado_desde: datetime | None = None,
@@ -119,12 +120,17 @@ def list_tickets(
 
 @router.post("", response_model=TicketRead, status_code=201)
 def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticket:
+    try:
+        initial_state = get_initial_ticket_state_code(db)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
     ticket = Ticket(
         titulo=payload.titulo,
         descripcion=payload.descripcion,
         prioridad=payload.prioridad,
         asignado_a=payload.asignado_a,
-        estado=TicketEstado.ABIERTO,
+        estado=initial_state,
     )
     db.add(ticket)
     db.commit()
@@ -194,7 +200,7 @@ def transition_ticket_state(
     ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
 
     try:
-        validate_ticket_state_transition(ticket.estado, payload.estado)
+        validate_ticket_state_transition(ticket.estado, payload.estado, db=db)
     except InvalidTicketStateTransitionError as exc:
         return JSONResponse(status_code=409, content=exc.conflict.model_dump(mode="json"))
 
@@ -222,7 +228,7 @@ def update_ticket(
     changes = payload.model_dump(exclude_unset=True)
     if "estado" in changes and changes["estado"] != ticket.estado:
         try:
-            validate_ticket_state_transition(ticket.estado, changes["estado"])
+            validate_ticket_state_transition(ticket.estado, changes["estado"], db=db)
         except InvalidTicketStateTransitionError as exc:
             return JSONResponse(status_code=409, content=exc.conflict.model_dump(mode="json"))
 
