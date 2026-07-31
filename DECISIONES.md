@@ -104,3 +104,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso reemplazar el mapeo fijo por reglas declarativas de transición (`TransitionRule`) y construir el mapa de ejecución desde esas reglas, permitiendo inyectar reglas personalizadas por flujo.
 **Mi decisión:** acepté la refactorización porque prioriza extensibilidad: agregar o cambiar flujos se vuelve un cambio de configuración de reglas, no una reescritura del motor de validación.
 **Alternativa descartada:** mantener el diccionario fijo como única fuente de verdad (descartado por menor flexibilidad y mayor costo de mantenimiento al crecer reglas de negocio).
+
+###[Decisión] DEC-0013 - WebSocket de tickets con suscripción global o por ticket
+**Contexto:** se requería un canal en tiempo real para que usuarios pudieran detectar tickets nuevos de forma global y también rastrear un ticket específico sin ruido de otros eventos.
+**Uso de LLM:** se le pidió a Copilot implementar `WS /api/tickets/ws/tickets` con filtro opcional por `ticket_id`, emisión de eventos (`ticket.creado`, `ticket.actualizado`, `ticket.comentado`) y manejo de ciclo de vida de conexiones.
+**Salida del modelo:** propuso un manager en memoria para registrar conexiones globales y por ticket, emitir eventos según ámbito, limpiar desconexiones y documentar limitación en múltiples réplicas con estrategia pub/sub para producción.
+**Mi decisión:** acepté este enfoque porque cubre de inmediato los dos casos de uso (visión global y tracking puntual), mantiene el diseño simple para la fase actual y deja claro el camino de escalamiento.
+**Alternativa descartada:** implementar desde ahora infraestructura distribuida (Redis/NATS/Kafka) para fan-out cross-réplica (descartado por complejidad prematura para el alcance actual).
