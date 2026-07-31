@@ -1,18 +1,48 @@
 from datetime import datetime
-from enum import Enum as PyEnum
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
 
-class TicketEstado(str, PyEnum):
-    ABIERTO = "abierto"
-    EN_PROGRESO = "en_progreso"
-    RESUELTO = "resuelto"
-    CERRADO = "cerrado"
-    REABIERTO = "reabierto"
+class TicketWorkflowState(Base):
+    __tablename__ = "ticket_workflow_states"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    codigo: Mapped[str] = mapped_column(String(32), nullable=False, unique=True, index=True)
+    nombre: Mapped[str] = mapped_column(String(120), nullable=False)
+    activo: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
+    es_inicial: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    es_terminal: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=False)
+    orden: Mapped[int] = mapped_column(Integer(), nullable=False, default=0)
+
+
+class TicketWorkflowTransition(Base):
+    __tablename__ = "ticket_workflow_transitions"
+    __table_args__ = (
+        UniqueConstraint("estado_origen_id", "estado_destino_id", name="uq_ticket_transition_pair"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    estado_origen_id: Mapped[int] = mapped_column(
+        ForeignKey("ticket_workflow_states.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    estado_destino_id: Mapped[int] = mapped_column(
+        ForeignKey("ticket_workflow_states.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    activa: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
+
+    estado_origen: Mapped[TicketWorkflowState] = relationship(
+        foreign_keys=[estado_origen_id],
+    )
+    estado_destino: Mapped[TicketWorkflowState] = relationship(
+        foreign_keys=[estado_destino_id],
+    )
 
 
 class Ticket(Base):
@@ -22,11 +52,7 @@ class Ticket(Base):
     titulo: Mapped[str] = mapped_column(String(160), nullable=False)
     descripcion: Mapped[str | None] = mapped_column(Text(), nullable=True)
     prioridad: Mapped[str] = mapped_column(String(32), nullable=False, default="medium")
-    estado: Mapped[TicketEstado] = mapped_column(
-        SQLEnum(TicketEstado, native_enum=False, length=32),
-        nullable=False,
-        default=TicketEstado.ABIERTO,
-    )
+    estado: Mapped[str] = mapped_column(String(32), nullable=False)
     asignado_a: Mapped[str | None] = mapped_column(String(120), nullable=True)
     creado_en: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

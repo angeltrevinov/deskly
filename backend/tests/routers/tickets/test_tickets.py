@@ -1,3 +1,7 @@
+from app.db import SessionLocal
+from app.models import TicketWorkflowState, TicketWorkflowTransition
+
+
 def test_create_and_list_tickets(client):
     payload = {
         "titulo": "Primer ticket",
@@ -500,3 +504,62 @@ def test_patch_ticket_allows_same_estado_idempotent(client):
 
     assert response.status_code == 200
     assert response.json()["estado"] == "abierto"
+
+
+def test_ticket_state_transition_accepts_new_db_config_without_code_changes(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket configurable",
+            "descripcion": "workflow dinamico",
+            "prioridad": "medium",
+            "asignado_a": "qa",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    en_progreso_response = client.post(
+        f"/api/tickets/{ticket_id}/transicion",
+        json={"estado": "en_progreso"},
+    )
+    resuelto_response = client.post(
+        f"/api/tickets/{ticket_id}/transicion",
+        json={"estado": "resuelto"},
+    )
+    assert en_progreso_response.status_code == 200
+    assert resuelto_response.status_code == 200
+
+    with SessionLocal() as db:
+        qa_verificado = TicketWorkflowState(
+            codigo="qa_verificado",
+            nombre="QA verificado",
+            activo=True,
+            es_inicial=False,
+            es_terminal=False,
+            orden=6,
+        )
+        db.add(qa_verificado)
+        db.flush()
+
+        resuelto = (
+            db.query(TicketWorkflowState)
+            .filter(TicketWorkflowState.codigo == "resuelto")
+            .one()
+        )
+        db.add(
+            TicketWorkflowTransition(
+                estado_origen_id=resuelto.id,
+                estado_destino_id=qa_verificado.id,
+                activa=True,
+            )
+        )
+        db.commit()
+
+    dynamic_transition = client.post(
+        f"/api/tickets/{ticket_id}/transicion",
+        json={"estado": "qa_verificado"},
+    )
+
+    assert dynamic_transition.status_code == 200
+    assert dynamic_transition.json()["estado"] == "qa_verificado"

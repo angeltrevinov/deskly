@@ -3,8 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic import model_validator
 
-from app.models import TicketEstado
-
 
 class TicketCreate(BaseModel):
     titulo: str = Field(min_length=1, max_length=160)
@@ -17,7 +15,7 @@ class TicketUpdate(BaseModel):
     titulo: str | None = Field(default=None, min_length=1, max_length=160)
     descripcion: str | None = None
     prioridad: str | None = Field(default=None, max_length=32)
-    estado: TicketEstado | None = None
+    estado: str | None = Field(default=None, min_length=1, max_length=32)
     asignado_a: str | None = Field(default=None, max_length=120)
 
     @model_validator(mode="after")
@@ -38,7 +36,7 @@ class TicketRead(BaseModel):
     titulo: str
     descripcion: str | None
     prioridad: str
-    estado: TicketEstado
+    estado: str
     asignado_a: str | None
     creado_en: datetime
     actualizado_en: datetime
@@ -62,15 +60,15 @@ class TicketCommentRead(BaseModel):
 
 
 class TicketStateTransition(BaseModel):
-    estado: TicketEstado
+    estado: str = Field(min_length=1, max_length=32)
 
 
 class TicketStateTransitionConflict(BaseModel):
     error: str
     mensaje: str
-    estado_actual: TicketEstado
-    estado_objetivo: TicketEstado
-    transiciones_permitidas: list[TicketEstado]
+    estado_actual: str
+    estado_objetivo: str
+    transiciones_permitidas: list[str]
 
 
 class WebhookTicketPayload(BaseModel):

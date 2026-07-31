@@ -43,12 +43,18 @@ ensure_database_exists()
 
 from app.db import Base, engine  # noqa: E402
 from app.main import app  # noqa: E402
+from app.ticket_state_machine import seed_default_ticket_workflow  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
 def reset_database() -> Generator[None, None, None]:
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    from app.db import SessionLocal
+
+    with SessionLocal() as db:
+        seed_default_ticket_workflow(db)
+        db.commit()
     yield
     Base.metadata.drop_all(bind=engine)
 
