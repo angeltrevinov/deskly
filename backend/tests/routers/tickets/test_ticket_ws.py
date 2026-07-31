@@ -1,3 +1,6 @@
+import pytest
+from starlette.websockets import WebSocketDisconnect
+
 from app.routers.tickets.routes import ticket_ws_manager
 
 
@@ -109,3 +112,30 @@ def test_ws_disconnect_is_clean_and_does_not_leave_dead_connections(client):
     )
 
     assert create_response.status_code == 201
+
+
+def test_ws_rejects_invalid_ticket_id(client):
+    with pytest.raises(WebSocketDisconnect) as exc_info:
+        with client.websocket_connect("/api/tickets/ws/tickets?ticket_id=abc"):
+            pass
+
+    assert exc_info.value.code == 1008
+
+
+def test_ws_ticket_subscription_disconnect_cleans_connections(client):
+    ticket = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket cleanup",
+            "descripcion": "cleanup",
+            "prioridad": "medium",
+            "asignado_a": "qa",
+        },
+    ).json()
+
+    with client.websocket_connect(
+        f"/api/tickets/ws/tickets?ticket_id={ticket['id']}"
+    ):
+        pass
+
+    assert ticket_ws_manager.active_connection_count_from_sync() == 0

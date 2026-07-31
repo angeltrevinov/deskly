@@ -48,7 +48,10 @@ class TicketWebSocketManager:
 
     async def active_connection_count(self) -> int:
         async with self._lock:
-            return len(self._all_connections)
+            all_connections = set(self._all_connections)
+            for connections in self._ticket_connections.values():
+                all_connections.update(connections)
+            return len(all_connections)
 
     def emit_from_sync(self, event: str, ticket_id: int, payload: dict) -> None:
         try:

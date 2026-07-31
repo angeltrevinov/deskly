@@ -46,8 +46,8 @@ Todas las rutas de la API empiezan con `/api`.
 ### WebSocket tickets
 
 - `WS /api/tickets/ws/tickets`
-	- Sin query params: recibe eventos de todos los tickets.
-	- Con `?ticket_id=<id>`: recibe solo eventos del ticket indicado.
+  - Sin query params: recibe eventos de todos los tickets.
+  - Con `?ticket_id=<id>`: recibe solo eventos del ticket indicado.
 
 Eventos emitidos:
 
@@ -59,9 +59,9 @@ Cada mensaje tiene el formato:
 
 ```json
 {
-	"event": "ticket.creado",
-	"ticket_id": 123,
-	"payload": { "...": "..." }
+  "event": "ticket.creado",
+  "ticket_id": 123,
+  "payload": { "...": "..." }
 }
 ```
 
