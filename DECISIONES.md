@@ -111,3 +111,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso un manager en memoria para registrar conexiones globales y por ticket, emitir eventos según ámbito, limpiar desconexiones y documentar limitación en múltiples réplicas con estrategia pub/sub para producción.
 **Mi decisión:** acepté este enfoque porque cubre de inmediato los dos casos de uso (visión global y tracking puntual), mantiene el diseño simple para la fase actual y deja claro el camino de escalamiento.
 **Alternativa descartada:** implementar desde ahora infraestructura distribuida (Redis/NATS/Kafka) para fan-out cross-réplica (descartado por complejidad prematura para el alcance actual).
+
+###[Decisión] DEC-0014 - Webhook firmado con HMAC, replay window e idempotencia persistente
+**Contexto:** hacia falta implementar `POST /api/webhooks/tickets` para crear tickets desde un sistema externo, con seguridad de firma, defensa contra replay y garantia de idempotencia por `event_id`.
+**Uso de LLM:** se le pidió a Copilot diseñar e implementar la ruta de webhook, el almacenamiento de idempotencia y pruebas para casos válidos e inválidos.
+**Salida del modelo:** propuso validar firma HMAC-SHA256 en tiempo constante sobre `timestamp.raw_body`, aplicar ventana temporal configurable para replay, y persistir eventos procesados en tabla dedicada con `event_id` único para devolver `200` en duplicados sin efectos secundarios.
+**Mi decisión:** acepté este enfoque porque cumple explícitamente los requisitos de seguridad y consistencia, y prioriza una implementación explicable y comprobable con tests de integración. El por qué explícito es reducir riesgo de tickets duplicados o falsificados manteniendo una ruta operable con infraestructura actual.
+**Alternativa descartada:** implementar idempotencia en memoria o cache local por proceso (descartado porque se pierde al reiniciar, no escala entre réplicas y no garantiza consistencia transaccional con la creación del ticket).
