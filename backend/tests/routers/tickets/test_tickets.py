@@ -478,3 +478,25 @@ def test_patch_ticket_rejects_invalid_state_transition_with_409(client):
         "estado_objetivo": "cerrado",
         "transiciones_permitidas": ["en_progreso"],
     }
+
+
+def test_patch_ticket_allows_same_estado_idempotent(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket idempotente",
+            "descripcion": "mismo estado",
+            "prioridad": "medium",
+            "asignado_a": "qa",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/api/tickets/{ticket_id}",
+        json={"estado": "abierto"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["estado"] == "abierto"

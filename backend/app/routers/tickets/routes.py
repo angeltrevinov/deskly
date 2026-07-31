@@ -187,7 +187,7 @@ def update_ticket(
     ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
 
     changes = payload.model_dump(exclude_unset=True)
-    if "estado" in changes:
+    if "estado" in changes and changes["estado"] != ticket.estado:
         try:
             validate_ticket_state_transition(ticket.estado, changes["estado"])
         except InvalidTicketStateTransitionError as exc:
