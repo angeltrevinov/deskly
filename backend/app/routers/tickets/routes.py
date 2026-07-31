@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
@@ -21,8 +21,10 @@ from app.ticket_state_machine import (
     InvalidTicketStateTransitionError,
     validate_ticket_state_transition,
 )
+from app.ticket_ws_manager import TicketWebSocketManager
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
+ticket_ws_manager = TicketWebSocketManager()
 
 
 class TicketSortBy(str, Enum):
@@ -44,6 +46,29 @@ def get_ticket_or_404(ticket_id: int, db: Session) -> Ticket:
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
     return ticket
+
+
+@router.websocket("/ws/tickets")
+async def tickets_ws(websocket: WebSocket) -> None:
+    ticket_id_param = websocket.query_params.get("ticket_id")
+    ticket_id: int | None = None
+    if ticket_id_param is not None:
+        try:
+            ticket_id = int(ticket_id_param)
+            if ticket_id < 1:
+                raise ValueError
+        except ValueError:
+            await websocket.close(code=1008, reason="ticket_id invalido")
+            return
+
+    await ticket_ws_manager.connect(websocket, ticket_id)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await ticket_ws_manager.disconnect(websocket)
 
 
 @router.get("", response_model=list[TicketRead])
@@ -105,6 +130,9 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticke
     db.add(ticket)
     db.commit()
     db.refresh(ticket)
+
+    ticket_payload = TicketRead.model_validate(ticket).model_dump(mode="json")
+    ticket_ws_manager.emit_from_sync("ticket.creado", ticket.id, ticket_payload)
     return ticket
 
 
@@ -148,6 +176,9 @@ def add_ticket_comment(
     db.add(comment)
     db.commit()
     db.refresh(comment)
+
+    comment_payload = TicketCommentRead.model_validate(comment).model_dump(mode="json")
+    ticket_ws_manager.emit_from_sync("ticket.comentado", comment.ticket_id, comment_payload)
     return comment
 
 
@@ -171,6 +202,9 @@ def transition_ticket_state(
     ticket.estado = payload.estado
     db.commit()
     db.refresh(ticket)
+
+    ticket_payload = TicketRead.model_validate(ticket).model_dump(mode="json")
+    ticket_ws_manager.emit_from_sync("ticket.actualizado", ticket.id, ticket_payload)
     return ticket
 
 
@@ -198,4 +232,7 @@ def update_ticket(
 
     db.commit()
     db.refresh(ticket)
+
+    ticket_payload = TicketRead.model_validate(ticket).model_dump(mode="json")
+    ticket_ws_manager.emit_from_sync("ticket.actualizado", ticket.id, ticket_payload)
     return ticket

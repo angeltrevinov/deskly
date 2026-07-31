@@ -43,6 +43,28 @@ Todas las rutas de la API empiezan con `/api`.
 - `GET /api/tickets/{ticket_id}`
 - `POST /api/tickets`
 
+### WebSocket tickets
+
+- `WS /api/tickets/ws/tickets`
+	- Sin query params: recibe eventos de todos los tickets.
+	- Con `?ticket_id=<id>`: recibe solo eventos del ticket indicado.
+
+Eventos emitidos:
+
+- `ticket.creado`
+- `ticket.actualizado`
+- `ticket.comentado`
+
+Cada mensaje tiene el formato:
+
+```json
+{
+	"event": "ticket.creado",
+	"ticket_id": 123,
+	"payload": { "...": "..." }
+}
+```
+
 ## Migraciones (Alembic)
 
 Aplicar migraciones:
@@ -97,3 +119,15 @@ docker compose down
 - App Next.js App Router con home minima
 - Dockerfiles multi-stage para ambos servicios
 - Entrypoint de Docker Compose con healthchecks
+
+## Limitacion en multiples replicas (WebSocket)
+
+La implementacion actual de WebSocket mantiene conexiones en memoria dentro de cada proceso del backend. Esto significa que, con multiples replicas, un evento emitido en una replica no se propaga automaticamente a clientes conectados en otras replicas.
+
+### Como resolverlo en produccion
+
+Usar un broker de pub/sub compartido (por ejemplo Redis Pub/Sub, NATS o Kafka):
+
+1. Cada replica publica eventos de ticket en el broker.
+2. Cada replica se suscribe a esos eventos y reenvia a sus clientes WebSocket locales.
+3. Se mantiene una distribucion consistente de eventos entre todas las replicas.
