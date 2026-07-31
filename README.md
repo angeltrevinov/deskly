@@ -86,14 +86,14 @@ Cada mensaje tiene el formato:
 
 ## Workflow de estados configurable en DB
 
-Las transiciones de estado de ticket ya no estan hardcodeadas en el backend. Se leen desde tablas de configuracion:
+Las transiciones de estado de ticket ya no están hardcodeadas en el backend. Se leen desde tablas de configuración:
 
 - `ticket_workflow_states`
 - `ticket_workflow_transitions`
 
-Para agregar un estado o transicion nueva no hace falta redeploy del backend; basta actualizar esas tablas.
+Para agregar un estado o transición nueva no hace falta redeploy del backend; basta actualizar esas tablas.
 
-Ejemplo SQL para agregar una nueva transicion `resuelto -> qa_verificado`:
+Ejemplo SQL para agregar una nueva transición `resuelto -> qa_verificado`:
 
 ```sql
 INSERT INTO ticket_workflow_states (codigo, nombre, activo, es_inicial, es_terminal, orden)

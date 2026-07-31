@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("activo", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("es_inicial", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("es_terminal", sa.Boolean(), nullable=False, server_default=sa.false()),
-        sa.Column("orden", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column("orden", sa.Integer(), nullable=False, server_default=sa.text("0")),
         sa.UniqueConstraint("codigo", name="uq_ticket_workflow_states_codigo"),
     )
     op.create_index(

@@ -542,7 +542,11 @@ def test_ticket_state_transition_accepts_new_db_config_without_code_changes(clie
         db.add(qa_verificado)
         db.flush()
 
-        resuelto = db.query(TicketWorkflowState).filter(TicketWorkflowState.codigo == "resuelto").one()
+        resuelto = (
+            db.query(TicketWorkflowState)
+            .filter(TicketWorkflowState.codigo == "resuelto")
+            .one()
+        )
         db.add(
             TicketWorkflowTransition(
                 estado_origen_id=resuelto.id,
