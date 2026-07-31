@@ -76,3 +76,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso agregar query params (`offset`, `limit`, `estado`, `prioridad`, `asignado`, rangos de fechas y `sort_by`/`sort_order`) con mapeo controlado de columnas para ordenar y tests para validar comportamiento.
 **Mi decisión:** acepté esta implementación porque mantiene un contrato simple vía query params, evita SQL dinámico inseguro y cubre los casos base de paginación y filtrado requeridos.
 **Alternativa descartada:** crear rutas separadas por cada combinación de filtro u ordenar libremente por texto recibido (descartado por complejidad de API y riesgo de errores/abuso).
+
+###[Decisión] DEC-0009 - Listado de comentarios por ticket con offset
+**Contexto:** se necesitaba exponer `GET /api/tickets/{id}/comentarios` para consultar comentarios de un ticket en orden del más reciente al más antiguo y con paginación por offset.
+**Uso de LLM:** se le pidió a Copilot implementar la ruta de lectura de comentarios con paginación y pruebas de integración.
+**Salida del modelo:** propuso reutilizar validación de ticket existente, ordenar por `creado_en desc` con desempate por `id desc`, y aceptar `offset`/`limit` como query params.
+**Mi decisión:** acepté esta implementación porque cumple el comportamiento solicitado (más recientes primero), mantiene resultados estables entre páginas y deja cobertura para paginación y ticket no encontrado.
+**Alternativa descartada:** ordenar ascendente o paginar por cursor en esta etapa (descartado porque no coincide con el requerimiento actual y agregaría complejidad prematura).
