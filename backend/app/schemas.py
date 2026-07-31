@@ -59,3 +59,15 @@ class TicketCommentRead(BaseModel):
     creado_en: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TicketStateTransition(BaseModel):
+    estado: TicketEstado
+
+
+class TicketStateTransitionConflict(BaseModel):
+    error: str
+    mensaje: str
+    estado_actual: TicketEstado
+    estado_objetivo: TicketEstado
+    transiciones_permitidas: list[TicketEstado]

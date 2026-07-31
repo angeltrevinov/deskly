@@ -355,3 +355,126 @@ def test_list_ticket_comments_not_found(client):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Ticket no encontrado"}
+
+
+def test_ticket_state_transition_valid_flow(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket para flujo de estados",
+            "descripcion": "flujo",
+            "prioridad": "medium",
+            "asignado_a": "dev",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    en_progreso = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "en_progreso"},
+    )
+    assert en_progreso.status_code == 200
+    assert en_progreso.json()["estado"] == "en_progreso"
+
+    resuelto = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "resuelto"},
+    )
+    assert resuelto.status_code == 200
+    assert resuelto.json()["estado"] == "resuelto"
+
+    cerrado = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "cerrado"},
+    )
+    assert cerrado.status_code == 200
+    assert cerrado.json()["estado"] == "cerrado"
+
+
+def test_ticket_state_transition_allows_reabierto_from_resuelto(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket reabierto",
+            "descripcion": "reapertura",
+            "prioridad": "medium",
+            "asignado_a": "dev",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    first_transition = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "en_progreso"},
+    )
+    second_transition = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "resuelto"},
+    )
+    reopen_transition = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "reabierto"},
+    )
+
+    assert first_transition.status_code == 200
+    assert second_transition.status_code == 200
+    assert reopen_transition.status_code == 200
+    assert reopen_transition.json()["estado"] == "reabierto"
+
+
+def test_ticket_state_transition_invalid_returns_typed_409(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket invalido",
+            "descripcion": "invalid transition",
+            "prioridad": "low",
+            "asignado_a": "qa",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    response = client.post(
+        f"/api/tickets/{ticket_id}/transiciones",
+        json={"estado": "cerrado"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "error": "invalid_state_transition",
+        "mensaje": "Transicion de estado invalida",
+        "estado_actual": "abierto",
+        "estado_objetivo": "cerrado",
+        "transiciones_permitidas": ["en_progreso"],
+    }
+
+
+def test_patch_ticket_rejects_invalid_state_transition_with_409(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket patch invalido",
+            "descripcion": "invalid patch transition",
+            "prioridad": "low",
+            "asignado_a": "qa",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    response = client.patch(
+        f"/api/tickets/{ticket_id}",
+        json={"estado": "cerrado"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "error": "invalid_state_transition",
+        "mensaje": "Transicion de estado invalida",
+        "estado_actual": "abierto",
+        "estado_objetivo": "cerrado",
+        "transiciones_permitidas": ["en_progreso"],
+    }

@@ -83,3 +83,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso reutilizar validación de ticket existente, ordenar por `creado_en desc` con desempate por `id desc`, y aceptar `offset`/`limit` como query params.
 **Mi decisión:** acepté esta implementación porque cumple el comportamiento solicitado (más recientes primero), mantiene resultados estables entre páginas y deja cobertura para paginación y ticket no encontrado.
 **Alternativa descartada:** ordenar ascendente o paginar por cursor en esta etapa (descartado porque no coincide con el requerimiento actual y agregaría complejidad prematura).
+
+###[Decisión] DEC-0010 - Máquina de estados de tickets y lógica reutilizable
+**Contexto:** se necesitaba imponer transiciones válidas explícitas de estado para tickets y evitar errores internos cuando una transición fuera inválida.
+**Uso de LLM:** se le pidió a Copilot diseñar e implementar la máquina de estados con respuesta `409` tipada y reorganizar la lógica para que no quedara acoplada a un solo endpoint.
+**Salida del modelo:** propuso un módulo compartido con la definición de transiciones permitidas y una validación reutilizable, además de un endpoint de transición y protección equivalente en `PATCH` para impedir bypass de reglas.
+**Mi decisión:** acepté mover la lógica de negocio a un archivo universal porque el objetivo es tener un flujo claro del ciclo de vida del ticket, con reglas consistentes reutilizables por rutas actuales y futuras.
+**Alternativa descartada:** mantener la lógica de transición directamente en cada route (descartado por duplicación, mayor riesgo de inconsistencias y menor mantenibilidad).

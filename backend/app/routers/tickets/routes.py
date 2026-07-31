@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
@@ -12,7 +13,13 @@ from app.schemas import (
     TicketCommentRead,
     TicketCreate,
     TicketRead,
+    TicketStateTransition,
+    TicketStateTransitionConflict,
     TicketUpdate,
+)
+from app.ticket_state_machine import (
+    InvalidTicketStateTransitionError,
+    validate_ticket_state_transition,
 )
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
@@ -144,15 +151,48 @@ def add_ticket_comment(
     return comment
 
 
-@router.patch("/{ticket_id}", response_model=TicketRead)
+@router.post(
+    "/{ticket_id}/transiciones",
+    response_model=TicketRead,
+    responses={409: {"model": TicketStateTransitionConflict}},
+)
+def transition_ticket_state(
+    ticket_id: int,
+    payload: TicketStateTransition,
+    db: Session = Depends(get_db),
+) -> Ticket | JSONResponse:
+    ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
+
+    try:
+        validate_ticket_state_transition(ticket.estado, payload.estado)
+    except InvalidTicketStateTransitionError as exc:
+        return JSONResponse(status_code=409, content=exc.conflict.model_dump(mode="json"))
+
+    ticket.estado = payload.estado
+    db.commit()
+    db.refresh(ticket)
+    return ticket
+
+
+@router.patch(
+    "/{ticket_id}",
+    response_model=TicketRead,
+    responses={409: {"model": TicketStateTransitionConflict}},
+)
 def update_ticket(
     ticket_id: int,
     payload: TicketUpdate,
     db: Session = Depends(get_db),
-) -> Ticket:
+) -> Ticket | JSONResponse:
     ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
 
     changes = payload.model_dump(exclude_unset=True)
+    if "estado" in changes:
+        try:
+            validate_ticket_state_transition(ticket.estado, changes["estado"])
+        except InvalidTicketStateTransitionError as exc:
+            return JSONResponse(status_code=409, content=exc.conflict.model_dump(mode="json"))
+
     for field, value in changes.items():
         setattr(ticket, field, value)
 
