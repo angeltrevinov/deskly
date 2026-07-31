@@ -71,3 +71,15 @@ class TicketStateTransitionConflict(BaseModel):
     estado_actual: TicketEstado
     estado_objetivo: TicketEstado
     transiciones_permitidas: list[TicketEstado]
+
+
+class WebhookTicketPayload(BaseModel):
+    titulo: str = Field(min_length=1, max_length=160)
+    descripcion: str | None = None
+    prioridad: str = Field(default="medium", max_length=32)
+    asignado_a: str | None = Field(default=None, max_length=120)
+
+
+class WebhookTicketIngestRequest(BaseModel):
+    event_id: str = Field(min_length=1, max_length=120)
+    ticket: WebhookTicketPayload

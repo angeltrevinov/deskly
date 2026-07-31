@@ -57,3 +57,20 @@ class TicketComentario(Base):
     )
 
     ticket: Mapped[Ticket] = relationship(back_populates="comentarios")
+
+
+class TicketWebhookEvent(Base):
+    __tablename__ = "ticket_webhook_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    event_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True, index=True)
+    ticket_id: Mapped[int] = mapped_column(
+        ForeignKey("tickets.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    recibido_en: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    ticket: Mapped[Ticket] = relationship()

@@ -42,6 +42,25 @@ Todas las rutas de la API empiezan con `/api`.
 - `GET /api/tickets`
 - `GET /api/tickets/{ticket_id}`
 - `POST /api/tickets`
+- `POST /api/webhooks/tickets`
+
+### Webhook de ingesta
+
+Ruta:
+
+- `POST /api/webhooks/tickets`
+
+Headers requeridos:
+
+- `X-Deskly-Timestamp`: timestamp Unix en segundos.
+- `X-Deskly-Signature`: firma HMAC-SHA256 del mensaje `timestamp.raw_body`.
+
+Reglas:
+
+- Firma invalida: `401`.
+- Timestamp fuera de ventana (`WEBHOOK_REPLAY_WINDOW_SECONDS`): `401`.
+- Payload invalido: `422`.
+- `event_id` duplicado: `200` sin crear ticket nuevo.
 
 ### WebSocket tickets
 

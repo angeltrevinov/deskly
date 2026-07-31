@@ -21,10 +21,9 @@ from app.ticket_state_machine import (
     InvalidTicketStateTransitionError,
     validate_ticket_state_transition,
 )
-from app.ticket_ws_manager import TicketWebSocketManager
+from app.ticket_event_bus import ticket_ws_manager
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
-ticket_ws_manager = TicketWebSocketManager()
 
 
 class TicketSortBy(str, Enum):
