@@ -113,7 +113,7 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Alternativa descartada:** implementar desde ahora infraestructura distribuida (Redis/NATS/Kafka) para fan-out cross-réplica (descartado por complejidad prematura para el alcance actual).
 
 ###[Decisión] DEC-0014 - Webhook firmado con HMAC, replay window e idempotencia persistente
-**Contexto:** hacia falta implementar `POST /api/webhooks/tickets` para crear tickets desde un sistema externo, con seguridad de firma, defensa contra replay y garantia de idempotencia por `event_id`.
+**Contexto:** hacía falta implementar `POST /api/webhooks/tickets` para crear tickets desde un sistema externo, con seguridad de firma, defensa contra replay y garantía de idempotencia por `event_id`.
 **Uso de LLM:** se le pidió a Copilot diseñar e implementar la ruta de webhook, el almacenamiento de idempotencia y pruebas para casos válidos e inválidos.
 **Salida del modelo:** propuso validar firma HMAC-SHA256 en tiempo constante sobre `timestamp.raw_body`, aplicar ventana temporal configurable para replay, y persistir eventos procesados en tabla dedicada con `event_id` único para devolver `200` en duplicados sin efectos secundarios.
 **Mi decisión:** acepté este enfoque porque cumple explícitamente los requisitos de seguridad y consistencia, y prioriza una implementación explicable y comprobable con tests de integración. El por qué explícito es reducir riesgo de tickets duplicados o falsificados manteniendo una ruta operable con infraestructura actual.

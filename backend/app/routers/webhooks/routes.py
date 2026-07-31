@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import os
+import re
 import time
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
@@ -50,7 +51,16 @@ def verify_webhook_signature(raw_body: bytes, timestamp: int, signature: str) ->
         hashlib.sha256,
     ).hexdigest()
 
-    provided_signature = signature.removeprefix("sha256=")
+    provided_signature = signature.strip()
+    if provided_signature.startswith("sha256="):
+        provided_signature = provided_signature[len("sha256=") :]
+
+    # Guard format/length before compare to avoid malformed signature quirks.
+    if len(provided_signature) != len(expected_signature):
+        raise HTTPException(status_code=401, detail="Firma invalida")
+    if re.fullmatch(r"[0-9a-fA-F]{64}", provided_signature) is None:
+        raise HTTPException(status_code=401, detail="Firma invalida")
+
     if not hmac.compare_digest(provided_signature, expected_signature):
         raise HTTPException(status_code=401, detail="Firma invalida")
 
@@ -102,10 +112,19 @@ async def ingest_ticket_webhook(
         db.commit()
     except IntegrityError:
         db.rollback()
-        return JSONResponse(
-            status_code=200,
-            content={"status": "duplicado", "event_id": payload.event_id},
+
+        duplicate_after_race = (
+            db.query(TicketWebhookEvent)
+            .filter(TicketWebhookEvent.event_id == payload.event_id)
+            .first()
         )
+        if duplicate_after_race is not None:
+            return JSONResponse(
+                status_code=200,
+                content={"status": "duplicado", "event_id": payload.event_id},
+            )
+
+        raise HTTPException(status_code=500, detail="Error de integridad al procesar webhook")
 
     db.refresh(ticket)
 
