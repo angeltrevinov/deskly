@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+
+const bodyFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
+
+const headingFont = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
 export const metadata: Metadata = {
   title: "Deskly",
-  description: "Deskly frontend",
+  description: "Deskly frontend con base shadcn/ui",
 };
 
 type RootLayoutProps = Readonly<{
@@ -13,7 +24,9 @@ type RootLayoutProps = Readonly<{
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body className={`${bodyFont.variable} ${headingFont.variable} font-sans`}>
+        {children}
+      </body>
     </html>
   );
 }
