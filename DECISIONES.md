@@ -83,3 +83,24 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso reutilizar validación de ticket existente, ordenar por `creado_en desc` con desempate por `id desc`, y aceptar `offset`/`limit` como query params.
 **Mi decisión:** acepté esta implementación porque cumple el comportamiento solicitado (más recientes primero), mantiene resultados estables entre páginas y deja cobertura para paginación y ticket no encontrado.
 **Alternativa descartada:** ordenar ascendente o paginar por cursor en esta etapa (descartado porque no coincide con el requerimiento actual y agregaría complejidad prematura).
+
+###[Decisión] DEC-0010 - Máquina de estados de tickets y lógica reutilizable
+**Contexto:** se necesitaba imponer transiciones válidas explícitas de estado para tickets y evitar errores internos cuando una transición fuera inválida.
+**Uso de LLM:** se le pidió a Copilot diseñar e implementar la máquina de estados con respuesta `409` tipada y reorganizar la lógica para que no quedara acoplada a un solo endpoint.
+**Salida del modelo:** propuso un módulo compartido con la definición de transiciones permitidas y una validación reutilizable, además de un endpoint de transición y protección equivalente en `PATCH` para impedir bypass de reglas.
+**Mi decisión:** acepté mover la lógica de negocio a un archivo universal porque el objetivo es tener un flujo claro del ciclo de vida del ticket, con reglas consistentes reutilizables por rutas actuales y futuras.
+**Alternativa descartada:** mantener la lógica de transición directamente en cada route (descartado por duplicación, mayor riesgo de inconsistencias y menor mantenibilidad).
+
+###[Decisión] DEC-0011 - Ruta singular para transición de estado
+**Contexto:** la documentación del proyecto define el endpoint de transición en singular y esta ruta aún era nueva, por lo que no existían clientes externos que dependieran de la variante plural.
+**Uso de LLM:** se le pidió a Copilot ajustar contrato y pruebas para usar exclusivamente `/api/tickets/{id}/transicion`.
+**Salida del modelo:** propuso renombrar la ruta en el router y actualizar todas las pruebas de integración asociadas al flujo de transición.
+**Mi decisión:** acepté usar únicamente la forma singular `transicion` para mantener consistencia con la documentación oficial y evitar ambigüedad en el contrato de API.
+**Alternativa descartada:** mantener ambas rutas (`transicion` y `transiciones`) con alias temporal (descartado porque no hay clientes por compatibilizar y añadiría complejidad innecesaria).
+
+###[Decisión] DEC-0012 - Motor de transiciones declarativo y configurable
+**Contexto:** la validación con diccionario fijo estado->siguientes era funcional, pero complicaba escalar a nuevos flujos (por ejemplo `abierto -> cerrado` o `abierto -> invalido`) sin tocar lógica central repetidamente.
+**Uso de LLM:** se le pidió a Copilot proponer una base más flexible para la máquina de estados considerando que la funcionalidad es nueva y no hay compatibilidad histórica que preservar.
+**Salida del modelo:** propuso reemplazar el mapeo fijo por reglas declarativas de transición (`TransitionRule`) y construir el mapa de ejecución desde esas reglas, permitiendo inyectar reglas personalizadas por flujo.
+**Mi decisión:** acepté la refactorización porque prioriza extensibilidad: agregar o cambiar flujos se vuelve un cambio de configuración de reglas, no una reescritura del motor de validación.
+**Alternativa descartada:** mantener el diccionario fijo como única fuente de verdad (descartado por menor flexibilidad y mayor costo de mantenimiento al crecer reglas de negocio).
