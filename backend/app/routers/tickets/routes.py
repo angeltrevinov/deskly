@@ -106,6 +106,25 @@ def get_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
     return get_ticket_or_404(ticket_id=ticket_id, db=db)
 
 
+@router.get("/{ticket_id}/comentarios", response_model=list[TicketCommentRead])
+def list_ticket_comments(
+    ticket_id: int,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[TicketComentario]:
+    ticket = get_ticket_or_404(ticket_id=ticket_id, db=db)
+
+    return (
+        db.query(TicketComentario)
+        .filter(TicketComentario.ticket_id == ticket.id)
+        .order_by(desc(TicketComentario.creado_en), desc(TicketComentario.id))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+
 @router.post("/{ticket_id}/comentarios", response_model=TicketCommentRead, status_code=201)
 def add_ticket_comment(
     ticket_id: int,

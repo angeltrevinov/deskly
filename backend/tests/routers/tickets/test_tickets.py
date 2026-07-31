@@ -300,3 +300,58 @@ def test_add_comment_to_ticket_not_found(client):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Ticket no encontrado"}
+
+
+def test_list_ticket_comments_newest_first_with_offset(client):
+    create_payload = {
+        "titulo": "Ticket para listar comentarios",
+        "descripcion": "Descripcion base",
+        "prioridad": "medium",
+        "asignado_a": "dev",
+    }
+    create_response = client.post("/api/tickets", json=create_payload)
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    first_comment = client.post(
+        f"/api/tickets/{ticket_id}/comentarios",
+        json={"contenido": "Comentario 1", "autor": "qa1"},
+    )
+    second_comment = client.post(
+        f"/api/tickets/{ticket_id}/comentarios",
+        json={"contenido": "Comentario 2", "autor": "qa2"},
+    )
+    third_comment = client.post(
+        f"/api/tickets/{ticket_id}/comentarios",
+        json={"contenido": "Comentario 3", "autor": "qa3"},
+    )
+
+    assert first_comment.status_code == 201
+    assert second_comment.status_code == 201
+    assert third_comment.status_code == 201
+
+    list_response = client.get(
+        f"/api/tickets/{ticket_id}/comentarios",
+        params={"offset": 0, "limit": 2},
+    )
+    assert list_response.status_code == 200
+    comments = list_response.json()
+    assert len(comments) == 2
+    assert comments[0]["contenido"] == "Comentario 3"
+    assert comments[1]["contenido"] == "Comentario 2"
+
+    paginated_response = client.get(
+        f"/api/tickets/{ticket_id}/comentarios",
+        params={"offset": 2, "limit": 2},
+    )
+    assert paginated_response.status_code == 200
+    paginated_comments = paginated_response.json()
+    assert len(paginated_comments) == 1
+    assert paginated_comments[0]["contenido"] == "Comentario 1"
+
+
+def test_list_ticket_comments_not_found(client):
+    response = client.get("/api/tickets/999/comentarios")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Ticket no encontrado"}
