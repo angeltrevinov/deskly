@@ -371,21 +371,21 @@ def test_ticket_state_transition_valid_flow(client):
     ticket_id = create_response.json()["id"]
 
     en_progreso = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "en_progreso"},
     )
     assert en_progreso.status_code == 200
     assert en_progreso.json()["estado"] == "en_progreso"
 
     resuelto = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "resuelto"},
     )
     assert resuelto.status_code == 200
     assert resuelto.json()["estado"] == "resuelto"
 
     cerrado = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "cerrado"},
     )
     assert cerrado.status_code == 200
@@ -406,15 +406,15 @@ def test_ticket_state_transition_allows_reabierto_from_resuelto(client):
     ticket_id = create_response.json()["id"]
 
     first_transition = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "en_progreso"},
     )
     second_transition = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "resuelto"},
     )
     reopen_transition = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "reabierto"},
     )
 
@@ -438,7 +438,7 @@ def test_ticket_state_transition_invalid_returns_typed_409(client):
     ticket_id = create_response.json()["id"]
 
     response = client.post(
-        f"/api/tickets/{ticket_id}/transiciones",
+        f"/api/tickets/{ticket_id}/transicion",
         json={"estado": "cerrado"},
     )
 

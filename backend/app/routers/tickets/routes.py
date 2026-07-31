@@ -152,7 +152,7 @@ def add_ticket_comment(
 
 
 @router.post(
-    "/{ticket_id}/transiciones",
+    "/{ticket_id}/transicion",
     response_model=TicketRead,
     responses={409: {"model": TicketStateTransitionConflict}},
 )
