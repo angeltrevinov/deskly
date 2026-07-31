@@ -69,3 +69,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso una tabla `ticket_comentarios` con `ticket_id` FK y borrado en cascada, un endpoint que valida existencia del ticket y devuelve el comentario creado con `201`.
 **Mi decisión:** acepte este enfoque porque separa responsabilidades entre ticket y comentario, mantiene integridad referencial en DB y deja trazabilidad con pruebas para caso exitoso y ticket inexistente.
 **Alternativa descartada:** guardar comentarios embebidos en un campo de texto del ticket (descartado por baja trazabilidad y dificultad para consultar/ordenar comentarios individualmente).
+
+###[Decisión] DEC-0008 - Listado de tickets con filtros, offset y ordenamiento
+**Contexto:** se necesitaba que `GET /api/tickets` aceptara paginación por offset, filtros de estado/prioridad/asignado/fechas y ordenamiento por parámetros para soportar consultas más precisas.
+**Uso de LLM:** se le pidió a Copilot implementar filtros y sort en la ruta de listado junto con pruebas de integración.
+**Salida del modelo:** propuso agregar query params (`offset`, `limit`, `estado`, `prioridad`, `asignado`, rangos de fechas y `sort_by`/`sort_order`) con mapeo controlado de columnas para ordenar y tests para validar comportamiento.
+**Mi decisión:** acepté esta implementación porque mantiene un contrato simple vía query params, evita SQL dinámico inseguro y cubre los casos base de paginación y filtrado requeridos.
+**Alternativa descartada:** crear rutas separadas por cada combinación de filtro u ordenar libremente por texto recibido (descartado por complejidad de API y riesgo de errores/abuso).

@@ -125,6 +125,146 @@ def test_patch_ticket_rejects_null_in_non_nullable_field(client):
     assert response.status_code == 422
 
 
+def test_list_tickets_with_filters_sort_and_offset(client):
+    payloads = [
+        {
+            "titulo": "Ticket 1",
+            "descripcion": "Uno",
+            "prioridad": "high",
+            "asignado_a": "ana",
+        },
+        {
+            "titulo": "Ticket 2",
+            "descripcion": "Dos",
+            "prioridad": "medium",
+            "asignado_a": "luis",
+        },
+        {
+            "titulo": "Ticket 3",
+            "descripcion": "Tres",
+            "prioridad": "high",
+            "asignado_a": "ana",
+        },
+    ]
+
+    ticket_ids: list[int] = []
+    for payload in payloads:
+        response = client.post("/api/tickets", json=payload)
+        assert response.status_code == 201
+        ticket_ids.append(response.json()["id"])
+
+    patch_response = client.patch(
+        f"/api/tickets/{ticket_ids[0]}",
+        json={"estado": "en_progreso"},
+    )
+    assert patch_response.status_code == 200
+
+    filtered_response = client.get(
+        "/api/tickets",
+        params={
+            "estado": "en_progreso",
+            "prioridad": "high",
+            "asignado_a": "ana",
+            "sort_by": "id",
+            "sort_order": "asc",
+            "offset": 0,
+            "limit": 10,
+        },
+    )
+
+    assert filtered_response.status_code == 200
+    filtered_tickets = filtered_response.json()
+    assert len(filtered_tickets) == 1
+    assert filtered_tickets[0]["id"] == ticket_ids[0]
+
+    paginated_response = client.get(
+        "/api/tickets",
+        params={
+            "sort_by": "id",
+            "sort_order": "asc",
+            "offset": 1,
+            "limit": 1,
+        },
+    )
+    assert paginated_response.status_code == 200
+    paginated_tickets = paginated_response.json()
+    assert len(paginated_tickets) == 1
+    assert paginated_tickets[0]["id"] == ticket_ids[1]
+
+
+def test_list_tickets_with_date_filters(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket fechas",
+            "descripcion": "Con fechas",
+            "prioridad": "low",
+            "asignado_a": "maria",
+        },
+    )
+    assert create_response.status_code == 201
+
+    in_range_response = client.get(
+        "/api/tickets",
+        params={
+            "creado_desde": "2000-01-01T00:00:00Z",
+            "creado_hasta": "2100-01-01T00:00:00Z",
+        },
+    )
+    assert in_range_response.status_code == 200
+    assert len(in_range_response.json()) == 1
+
+    out_of_range_response = client.get(
+        "/api/tickets",
+        params={
+            "creado_desde": "2100-01-02T00:00:00Z",
+            "creado_hasta": "2100-01-03T00:00:00Z",
+        },
+    )
+    assert out_of_range_response.status_code == 200
+    assert out_of_range_response.json() == []
+
+
+def test_list_tickets_with_updated_date_filters(client):
+    create_response = client.post(
+        "/api/tickets",
+        json={
+            "titulo": "Ticket actualizado por filtro",
+            "descripcion": "Con updated_at",
+            "prioridad": "low",
+            "asignado_a": "maria",
+        },
+    )
+    assert create_response.status_code == 201
+    ticket_id = create_response.json()["id"]
+
+    patch_response = client.patch(
+        f"/api/tickets/{ticket_id}",
+        json={"descripcion": "Descripcion actualizada"},
+    )
+    assert patch_response.status_code == 200
+
+    in_range_response = client.get(
+        "/api/tickets",
+        params={
+            "actualizado_desde": "2000-01-01T00:00:00Z",
+            "actualizado_hasta": "2100-01-01T00:00:00Z",
+        },
+    )
+    assert in_range_response.status_code == 200
+    assert len(in_range_response.json()) == 1
+
+    out_of_range_response = client.get(
+        "/api/tickets",
+        params={
+            "actualizado_desde": "2100-01-02T00:00:00Z",
+            "actualizado_hasta": "2100-01-03T00:00:00Z",
+        },
+    )
+    assert out_of_range_response.status_code == 200
+    assert out_of_range_response.json() == []
+
+
 def test_add_comment_to_ticket(client):
     create_payload = {
         "titulo": "Ticket con comentarios",
