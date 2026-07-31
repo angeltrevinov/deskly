@@ -45,7 +45,7 @@ def list_tickets(
     limit: int = Query(default=20, ge=1, le=100),
     estado: TicketEstado | None = None,
     prioridad: str | None = Query(default=None, max_length=32),
-    asignado: str | None = Query(default=None, max_length=120),
+    asignado_a: str | None = Query(default=None, max_length=120),
     creado_desde: datetime | None = None,
     creado_hasta: datetime | None = None,
     actualizado_desde: datetime | None = None,
@@ -60,8 +60,8 @@ def list_tickets(
         query = query.filter(Ticket.estado == estado)
     if prioridad is not None:
         query = query.filter(Ticket.prioridad == prioridad)
-    if asignado is not None:
-        query = query.filter(Ticket.asignado_a == asignado)
+    if asignado_a is not None:
+        query = query.filter(Ticket.asignado_a == asignado_a)
     if creado_desde is not None:
         query = query.filter(Ticket.creado_en >= creado_desde)
     if creado_hasta is not None:

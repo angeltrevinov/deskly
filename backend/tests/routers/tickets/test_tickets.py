@@ -164,7 +164,7 @@ def test_list_tickets_with_filters_sort_and_offset(client):
         params={
             "estado": "en_progreso",
             "prioridad": "high",
-            "asignado": "ana",
+            "asignado_a": "ana",
             "sort_by": "id",
             "sort_order": "asc",
             "offset": 0,
