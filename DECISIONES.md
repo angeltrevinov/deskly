@@ -97,3 +97,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso renombrar la ruta en el router y actualizar todas las pruebas de integración asociadas al flujo de transición.
 **Mi decisión:** acepté usar únicamente la forma singular `transicion` para mantener consistencia con la documentación oficial y evitar ambigüedad en el contrato de API.
 **Alternativa descartada:** mantener ambas rutas (`transicion` y `transiciones`) con alias temporal (descartado porque no hay clientes por compatibilizar y añadiría complejidad innecesaria).
+
+###[Decisión] DEC-0012 - Motor de transiciones declarativo y configurable
+**Contexto:** la validación con diccionario fijo estado->siguientes era funcional, pero complicaba escalar a nuevos flujos (por ejemplo `abierto -> cerrado` o `abierto -> invalido`) sin tocar lógica central repetidamente.
+**Uso de LLM:** se le pidió a Copilot proponer una base más flexible para la máquina de estados considerando que la funcionalidad es nueva y no hay compatibilidad histórica que preservar.
+**Salida del modelo:** propuso reemplazar el mapeo fijo por reglas declarativas de transición (`TransitionRule`) y construir el mapa de ejecución desde esas reglas, permitiendo inyectar reglas personalizadas por flujo.
+**Mi decisión:** acepté la refactorización porque prioriza extensibilidad: agregar o cambiar flujos se vuelve un cambio de configuración de reglas, no una reescritura del motor de validación.
+**Alternativa descartada:** mantener el diccionario fijo como única fuente de verdad (descartado por menor flexibilidad y mayor costo de mantenimiento al crecer reglas de negocio).

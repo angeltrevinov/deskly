@@ -3,6 +3,8 @@ import pytest
 from app.models import TicketEstado
 from app.ticket_state_machine import (
     InvalidTicketStateTransitionError,
+    TransitionRule,
+    get_allowed_next_states,
     validate_ticket_state_transition,
 )
 
@@ -42,3 +44,29 @@ def test_validate_ticket_state_transition_rejects_invalid_transitions(
     assert conflict.estado_actual == current_state
     assert conflict.estado_objetivo == next_state
     assert conflict.transiciones_permitidas == expected_allowed
+
+
+def test_get_allowed_next_states_supports_custom_rules():
+    custom_rules = (
+        TransitionRule(from_state=TicketEstado.ABIERTO, to_state=TicketEstado.CERRADO),
+        TransitionRule(from_state=TicketEstado.ABIERTO, to_state=TicketEstado.REABIERTO),
+    )
+
+    allowed_next_states = get_allowed_next_states(
+        TicketEstado.ABIERTO,
+        transition_rules=custom_rules,
+    )
+
+    assert allowed_next_states == (TicketEstado.CERRADO, TicketEstado.REABIERTO)
+
+
+def test_validate_ticket_state_transition_supports_custom_rules():
+    custom_rules = (
+        TransitionRule(from_state=TicketEstado.ABIERTO, to_state=TicketEstado.CERRADO),
+    )
+
+    validate_ticket_state_transition(
+        TicketEstado.ABIERTO,
+        TicketEstado.CERRADO,
+        transition_rules=custom_rules,
+    )
