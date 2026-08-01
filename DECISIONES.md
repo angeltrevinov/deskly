@@ -153,3 +153,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso exportar `openapi.json` desde FastAPI, generar un archivo TypeScript compartido con `openapi-typescript`, crear un cliente tipado en el frontend y usarlo en la página principal para consumir tickets reales.
 **Mi decisión:** acepté la estrategia y la ajusté para que el webhook declare su request body tipado en FastAPI, porque el por qué explícito es que el contrato generado refleje exactamente el backend y no dependa de tipos escritos a mano en dos lugares.
 **Alternativa descartada:** definir interfaces manuales en el frontend o duplicar DTOs por dominio (descartado por mayor riesgo de desalineación y mantenimiento doble).
+
+###[Decisión] DEC-0020 - Pruebas unitarias de frontend con Jest + Testing Library
+**Contexto:** hacía falta incorporar una base de pruebas unitarias en frontend para validar componentes y utilidades antes de ampliar cobertura funcional.
+**Uso de LLM:** se le pidió a Copilot implementar pruebas unitarias en frontend con preferencia explícita por Jest y dejarlo listo para integración en PR.
+**Salida del modelo:** propuso configurar `next/jest` con `jsdom`, setup global para `@testing-library/jest-dom`, scripts de test (`test`, `test:watch`, `test:coverage`) y pruebas iniciales para utilidades (`cn`), cliente API (`getTickets`) y componente `Button`.
+**Mi decisión:** acepté Jest como base de unit testing en frontend porque el por qué explícito indicado fue la preferencia de usar Jest para este tipo de pruebas y su integración directa con Next.js mediante `next/jest`.
+**Alternativa descartada:** usar Vitest para pruebas unitarias (descartado en esta etapa para respetar la preferencia de stack y evitar mezclar runners en el mismo frontend).
