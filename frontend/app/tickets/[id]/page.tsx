@@ -2,7 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ApiError, getTicket, getTicketComments, type Ticket, type TicketCommentRead } from "@/lib/api"
+import { ApiError, getTicket, getTicketComments, type TicketCommentRead } from "@/lib/api"
 
 export const dynamic = "force-dynamic"
 
@@ -36,12 +36,13 @@ function DetailField({ label, value }: { label: string; value: string }) {
   )
 }
 
-async function TicketDetail({ ticketId }: { ticketId: number }) {
-  const [ticket, comments] = await Promise.all([
-    getTicket(ticketId),
-    getTicketComments(ticketId, { limit: 100 }),
-  ])
-
+function TicketDetail({
+  ticket,
+  comments,
+}: {
+  ticket: Awaited<ReturnType<typeof getTicket>>
+  comments: Awaited<ReturnType<typeof getTicketComments>>
+}) {
   return (
     <div className="grid gap-6">
       <Card className="border-border/70 bg-background/80 shadow-sm backdrop-blur">
@@ -106,52 +107,7 @@ function isNotFoundError(error: unknown) {
   return error instanceof ApiError && error.status === 404
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const ticketId = Number(id)
-
-  if (!Number.isInteger(ticketId) || ticketId < 1) {
-    notFound()
-  }
-
-  let errorMessage: string | null = null
-
-  try {
-    return (
-      <div className="min-h-svh bg-[radial-gradient(circle_at_top_left,var(--color-muted)_0%,transparent_38%),linear-gradient(180deg,var(--color-background)_0%,color-mix(in_oklch,var(--color-background)_88%,var(--color-muted)_12%)_100%)] p-6 md:p-10">
-        <main className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-          <section className="space-y-3">
-            <Link
-              href="/"
-              className="inline-flex items-center text-sm font-medium text-muted-foreground transition hover:text-foreground"
-            >
-              ← Volver al listado
-            </Link>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Deskly ticket detail
-            </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              Detalle SSR con comentarios del ticket.
-            </h1>
-          </section>
-
-          <TicketDetail ticketId={ticketId} />
-        </main>
-      </div>
-    )
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      notFound()
-    }
-
-    errorMessage =
-      error instanceof Error ? error.message : "Ocurrió un error al consultar el backend"
-  }
-
+function TicketPageShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-svh bg-[radial-gradient(circle_at_top_left,var(--color-muted)_0%,transparent_38%),linear-gradient(180deg,var(--color-background)_0%,color-mix(in_oklch,var(--color-background)_88%,var(--color-muted)_12%)_100%)] p-6 md:p-10">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -170,8 +126,45 @@ export default async function Page({
           </h1>
         </section>
 
-        <ErrorState message={errorMessage} />
+        {children}
       </main>
     </div>
+  )
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const ticketId = Number(id)
+
+  if (!Number.isInteger(ticketId) || ticketId < 1) {
+    notFound()
+  }
+
+  let errorMessage: string | null = null
+  let ticket: Awaited<ReturnType<typeof getTicket>> | null = null
+  let comments: Awaited<ReturnType<typeof getTicketComments>> = []
+
+  try {
+    ;[ticket, comments] = await Promise.all([
+      getTicket(ticketId),
+      getTicketComments(ticketId, { limit: 100 }),
+    ])
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      notFound()
+    }
+
+    errorMessage =
+      error instanceof Error ? error.message : "Ocurrió un error al consultar el backend"
+  }
+
+  return (
+    <TicketPageShell>
+      {ticket ? <TicketDetail ticket={ticket} comments={comments} /> : <ErrorState message={errorMessage ?? "Ocurrió un error al consultar el backend"} />}
+    </TicketPageShell>
   )
 }
