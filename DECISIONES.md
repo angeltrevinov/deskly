@@ -167,3 +167,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso un workflow dedicado de GitHub Actions para PR con cuatro jobs independientes: `lint`, `typecheck`, `unit tests` (Jest) y `docker build`, usando `actions/setup-node` + `npm ci` y control de concurrencia para cancelar ejecuciones anteriores del mismo PR.
 **Mi decisión:** acepté este enfoque porque el por qué explícito indicado fue tener una barrera de calidad previa al merge en frontend, igual que backend, para detectar fallos temprano y evitar merges con regresiones.
 **Alternativa descartada:** ejecutar únicamente un job de build o dejar las validaciones de frontend como ejecución manual local (descartado por menor cobertura y por no bloquear automáticamente PRs con errores).
+
+###[Decisión] DEC-0022 - Refactor de tickets dashboard en subcomponentes
+**Contexto:** el archivo del dashboard de tickets acumuló demasiada responsabilidad (filtros, tabla, paginación y lógica de orquestación), dificultando lectura y mantenimiento.
+**Uso de LLM:** se le pidió a Copilot reducir más la lógica del dashboard y separarlo en componentes si era necesario.
+**Salida del modelo:** propuso extraer tres piezas (`DashboardFilters`, `DashboardTable`, `DashboardPagination`) y dejar `TicketsDashboard` como orquestador de query params, estado de conexión y navegación.
+**Mi decisión:** acepté la separación porque el por qué explícito fue legibilidad/mantenibilidad, manteniendo el mismo comportamiento visible y reduciendo complejidad del archivo principal.
+**Alternativa descartada:** mantener toda la implementación en un solo componente con helpers internos (descartado por seguir concentrando demasiada lógica en un único archivo).
