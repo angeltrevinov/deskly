@@ -5,9 +5,7 @@ import re
 import time
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
-from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -69,6 +67,7 @@ def verify_webhook_signature(raw_body: bytes, timestamp: int, signature: str) ->
 @router.post("/tickets")
 async def ingest_ticket_webhook(
     request: Request,
+    payload: WebhookTicketIngestRequest,
     x_deskly_timestamp: int = Header(..., alias="X-Deskly-Timestamp"),
     x_deskly_signature: str = Header(..., alias="X-Deskly-Signature"),
     db: Session = Depends(get_db),
@@ -79,11 +78,6 @@ async def ingest_ticket_webhook(
         timestamp=x_deskly_timestamp,
         signature=x_deskly_signature,
     )
-
-    try:
-        payload = WebhookTicketIngestRequest.model_validate_json(raw_body)
-    except ValidationError as exc:
-        raise RequestValidationError(exc.errors()) from exc
 
     duplicate_event = (
         db.query(TicketWebhookEvent)

@@ -146,3 +146,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso limpiar el directorio `frontend/`, ejecutar el scaffold oficial de Next.js + shadcn/ui, reacomodar la salida al layout esperado del repo y restaurar Docker/ajustes del proyecto alrededor de esa nueva base.
 **Mi decisión:** acepté rehacerlo desde cero porque el por qué explícito es alinear el proyecto con el flujo oficial de shadcn/ui, reducir desviaciones manuales y dejar una base más mantenible para los siguientes componentes del frontend.
 **Alternativa descartada:** seguir iterando sobre la instalación manual anterior (descartado porque el propio CLI no la detectaba como framework soportado y eso seguía dejando una base inconsistente respecto a la documentación oficial).
+
+###[Decisión] DEC-0019 - Tipos compartidos generados desde OpenAPI del backend
+**Contexto:** hacía falta evitar drift entre el contrato del backend FastAPI y los tipos usados por el frontend, especialmente para tickets y webhook.
+**Uso de LLM:** se le pidió a Copilot proponer una estrategia end-to-end para OpenAPI/tipos compartidos y generar la base de implementación porque el objetivo era eliminar tipos duplicados manuales.
+**Salida del modelo:** propuso exportar `openapi.json` desde FastAPI, generar un archivo TypeScript compartido con `openapi-typescript`, crear un cliente tipado en el frontend y usarlo en la página principal para consumir tickets reales.
+**Mi decisión:** acepté la estrategia y la ajusté para que el webhook declare su request body tipado en FastAPI, porque el por qué explícito es que el contrato generado refleje exactamente el backend y no dependa de tipos escritos a mano en dos lugares.
+**Alternativa descartada:** definir interfaces manuales en el frontend o duplicar DTOs por dominio (descartado por mayor riesgo de desalineación y mantenimiento doble).

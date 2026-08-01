@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "eslint",
+    "generate:api-contract": "openapi-typescript lib/deskly-openapi.json -o lib/deskly-api.ts",
+    "sync:api-contract": "/usr/bin/python ../backend/scripts/export_openapi.py && npm run generate:api-contract",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit"
   },
@@ -31,6 +33,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "tailwindcss": "^4",
