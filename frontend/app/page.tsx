@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getTickets, type Ticket } from "@/lib/api"
 
@@ -12,7 +14,10 @@ function formatDate(value: string) {
 
 function TicketRow({ ticket }: { ticket: Ticket }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/70 px-4 py-3">
+    <Link
+      href={`/tickets/${ticket.id}`}
+      className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/70 px-4 py-3 transition hover:border-border hover:bg-background"
+    >
       <div className="min-w-0">
         <p className="truncate font-medium text-foreground">{ticket.titulo}</p>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -23,7 +28,7 @@ function TicketRow({ ticket }: { ticket: Ticket }) {
         <p>ID {ticket.id}</p>
         <p>{formatDate(ticket.actualizado_en)}</p>
       </div>
-    </div>
+    </Link>
   )
 }
 

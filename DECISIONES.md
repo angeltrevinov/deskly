@@ -153,3 +153,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso exportar `openapi.json` desde FastAPI, generar un archivo TypeScript compartido con `openapi-typescript`, crear un cliente tipado en el frontend y usarlo en la página principal para consumir tickets reales.
 **Mi decisión:** acepté la estrategia y la ajusté para que el webhook declare su request body tipado en FastAPI, porque el por qué explícito es que el contrato generado refleje exactamente el backend y no dependa de tipos escritos a mano en dos lugares.
 **Alternativa descartada:** definir interfaces manuales en el frontend o duplicar DTOs por dominio (descartado por mayor riesgo de desalineación y mantenimiento doble).
+
+###[Decisión] DEC-0020 - Detalle SSR de ticket con comentarios en App Router
+**Contexto:** hacía falta implementar `/tickets/[id]` en el frontend para renderizar el detalle del ticket y sus comentarios desde el servidor usando el contrato existente del backend.
+**Uso de LLM:** se le pidió a Copilot inspeccionar el frontend actual, verificar el patrón de Server Components en Next.js y proponer la extensión mínima para soportar detalle SSR con comentarios.
+**Salida del modelo:** propuso extender `frontend/lib/api.ts` con lecturas tipadas de ticket y comentarios, crear `frontend/app/tickets/[id]/page.tsx` como Server Component dinámico y enlazar el listado principal al detalle.
+**Mi decisión:** acepté esa dirección con fetches paralelos y manejo explícito de `404`, porque el por qué explícito es entregar el detalle completo en la primera respuesta del servidor sin duplicar lógica cliente ni apartarse del patrón SSR ya usado en el proyecto.
+**Alternativa descartada:** crear la vista de detalle como Client Component con fetch en navegador (descartado porque retrasa la carga útil inicial, duplica estados de carga/error en cliente y no cumple tan claramente el objetivo de SSR).
