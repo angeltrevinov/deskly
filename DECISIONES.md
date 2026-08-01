@@ -139,3 +139,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso una file instruction acotada a `frontend/**/*.{ts,tsx,css}` para priorizar shadcn/ui en vistas y componentes reutilizables, manteniendo libertad para customización visual encima de esa base.
 **Mi decisión:** acepté la instrucción persistente porque el por qué explícito es sostener estandarización, velocidad de desarrollo, accesibilidad y consistencia visual sin cargar reglas innecesarias en backend.
 **Alternativa descartada:** convertirlo en skill on-demand o ponerlo como instrucción global del workspace (descartado porque esto debe aplicar siempre en frontend, pero no tiene sentido contaminar tareas no relacionadas con UI).
+
+###[Decisión] DEC-0018 - Reconstrucción total del frontend con el CLI oficial de shadcn/ui
+**Contexto:** hacía falta rehacer el frontend desde una base limpia porque la integración manual previa no era reconocida por el CLI oficial de shadcn/ui y eso bloqueaba el flujo estándar de scaffolding.
+**Uso de LLM:** se le pidió a Copilot borrar el frontend actual y reconstruirlo con la documentación oficial usando `npx shadcn@latest init -t next`.
+**Salida del modelo:** propuso limpiar el directorio `frontend/`, ejecutar el scaffold oficial de Next.js + shadcn/ui, reacomodar la salida al layout esperado del repo y restaurar Docker/ajustes del proyecto alrededor de esa nueva base.
+**Mi decisión:** acepté rehacerlo desde cero porque el por qué explícito es alinear el proyecto con el flujo oficial de shadcn/ui, reducir desviaciones manuales y dejar una base más mantenible para los siguientes componentes del frontend.
+**Alternativa descartada:** seguir iterando sobre la instalación manual anterior (descartado porque el propio CLI no la detectaba como framework soportado y eso seguía dejando una base inconsistente respecto a la documentación oficial).
