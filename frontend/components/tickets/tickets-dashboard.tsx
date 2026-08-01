@@ -30,6 +30,15 @@ type TicketsDashboardProps = {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
+const ALLOWED_SORT_BY: TicketSortBy[] = [
+  "id",
+  "estado",
+  "prioridad",
+  "asignado_a",
+  "creado_en",
+  "actualizado_en",
+]
+const ALLOWED_SORT_ORDER: SortOrder[] = ["asc", "desc"]
 
 const TABLE_SORT_TO_API_SORT: Record<string, TicketSortBy> = {
   prioridad: "prioridad",
@@ -68,13 +77,24 @@ export function TicketsDashboard({
   const query = useMemo<DashboardQuery>(() => {
     const parsedPage = Number(searchParams.get("page") ?? initialQuery.page)
     const parsedLimit = Number(searchParams.get("limit") ?? initialQuery.limit)
+    const rawSortBy = searchParams.get("sort_by")
+    const rawSortOrder = searchParams.get("sort_order")
+
+    const sort_by =
+      rawSortBy && ALLOWED_SORT_BY.includes(rawSortBy as TicketSortBy)
+        ? (rawSortBy as TicketSortBy)
+        : initialQuery.sort_by
+    const sort_order =
+      rawSortOrder && ALLOWED_SORT_ORDER.includes(rawSortOrder as SortOrder)
+        ? (rawSortOrder as SortOrder)
+        : initialQuery.sort_order
 
     return {
       estado: searchParams.get("estado") ?? undefined,
       prioridad: searchParams.get("prioridad") ?? undefined,
       asignado_a: searchParams.get("asignado_a") ?? undefined,
-      sort_by: (searchParams.get("sort_by") as TicketSortBy | null) ?? initialQuery.sort_by,
-      sort_order: (searchParams.get("sort_order") as SortOrder | null) ?? initialQuery.sort_order,
+      sort_by,
+      sort_order,
       page: Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : initialQuery.page,
       limit:
         Number.isFinite(parsedLimit) && PAGE_SIZE_OPTIONS.includes(parsedLimit)

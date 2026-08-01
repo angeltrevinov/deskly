@@ -15,6 +15,16 @@ type PageProps = {
   searchParams?: Promise<PageSearchParams> | PageSearchParams
 }
 
+const ALLOWED_SORT_BY: TicketSortBy[] = [
+  "id",
+  "estado",
+  "prioridad",
+  "asignado_a",
+  "creado_en",
+  "actualizado_en",
+]
+const ALLOWED_SORT_ORDER: SortOrder[] = ["asc", "desc"]
+
 function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
@@ -36,13 +46,21 @@ function parseDashboardQuery(searchParams: PageSearchParams): DashboardQuery {
 
   const sortBy = firstParam(searchParams.sort_by)
   const sortOrder = firstParam(searchParams.sort_order)
+  const normalizedSortBy =
+    sortBy && ALLOWED_SORT_BY.includes(sortBy as TicketSortBy)
+      ? (sortBy as TicketSortBy)
+      : "creado_en"
+  const normalizedSortOrder =
+    sortOrder && ALLOWED_SORT_ORDER.includes(sortOrder as SortOrder)
+      ? (sortOrder as SortOrder)
+      : "desc"
 
   return {
     estado: firstParam(searchParams.estado) || undefined,
     prioridad: firstParam(searchParams.prioridad) || undefined,
     asignado_a: firstParam(searchParams.asignado_a) || undefined,
-    sort_by: (sortBy as TicketSortBy | undefined) ?? "creado_en",
-    sort_order: (sortOrder as SortOrder | undefined) ?? "desc",
+    sort_by: normalizedSortBy,
+    sort_order: normalizedSortOrder,
     page,
     limit: [10, 20, 50].includes(limit) ? limit : 20,
   }
@@ -63,7 +81,6 @@ function toListQuery(query: DashboardQuery): ListTicketsQuery {
 export default async function Page({ searchParams }: PageProps) {
   const resolvedParams = (await Promise.resolve(searchParams ?? {})) as PageSearchParams
   const initialQuery = parseDashboardQuery(resolvedParams)
-  const dashboardKey = `${initialQuery.estado ?? ""}|${initialQuery.prioridad ?? ""}|${initialQuery.asignado_a ?? ""}|${initialQuery.sort_by}|${initialQuery.sort_order}|${initialQuery.page}|${initialQuery.limit}`
 
   let tickets: Ticket[] = []
   let errorMessage: string | null = null
@@ -89,12 +106,7 @@ export default async function Page({ searchParams }: PageProps) {
           </p>
         </section>
 
-        <TicketsDashboard
-          key={dashboardKey}
-          initialTickets={tickets}
-          initialQuery={initialQuery}
-          initialErrorMessage={errorMessage}
-        />
+        <TicketsDashboard initialTickets={tickets} initialQuery={initialQuery} initialErrorMessage={errorMessage} />
       </main>
     </div>
   )
