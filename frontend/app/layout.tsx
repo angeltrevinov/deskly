@@ -1,19 +1,30 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import { Geist, Geist_Mono } from "next/font/google"
 
-export const metadata: Metadata = {
-  title: "Deskly",
-  description: "Deskly frontend",
-};
+import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import { cn } from "@/lib/utils";
 
-type RootLayoutProps = Readonly<{
-  children: React.ReactNode;
-}>;
+const geist = Geist({subsets:['latin'],variable:'--font-sans'})
 
-export default function RootLayout({ children }: RootLayoutProps) {
+const fontMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+})
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+    >
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
-  );
+  )
 }

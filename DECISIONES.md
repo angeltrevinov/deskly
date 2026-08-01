@@ -125,3 +125,24 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso crear tablas `ticket_workflow_states` y `ticket_workflow_transitions`, sembrar reglas iniciales por migración y validar transiciones en runtime consultando DB.
 **Mi decisión:** acepté este diseño porque hoy no hay clientes productivos ni restricciones de compatibilidad, y el por qué explícito es ganar flexibilidad operativa para agregar estados/transiciones sin tocar ni desplegar el backend.
 **Alternativa descartada:** mantener enum y reglas hardcodeadas con feature flags por entorno (descartado porque seguiría requiriendo cambios de código y despliegues ante cada ajuste de workflow).
+
+###[Decisión] DEC-0016 - Integración de shadcn/ui como base del frontend
+**Contexto:** hacía falta establecer una base de componentes reusable para el frontend en Next.js antes de avanzar con dashboard, detalle SSR y estados interactivos más complejos.
+**Uso de LLM:** se le pidió a Copilot integrar shadcn/ui en el proyecto actual y dejar la configuración mínima funcional sobre Next.js App Router.
+**Salida del modelo:** propuso agregar Tailwind CSS, utilidades de shadcn (`class-variance-authority`, `clsx`, `tailwind-merge`), configuración `components.json`, helpers compartidos y componentes base como `Button` y `Card`.
+**Mi decisión:** acepté esta integración porque el por qué explícito fue combinar estandarización de componentes, velocidad de desarrollo, accesibilidad base y alta customización con una solución popular, ligera y fácil de integrar con Next.js.
+**Alternativa descartada:** construir una librería visual casera desde cero o adoptar un kit más cerrado (descartado por mayor costo inicial o menor flexibilidad para adaptar el diseño del proyecto).
+
+###[Decisión] DEC-0017 - Instrucción persistente para usar shadcn/ui en frontend
+**Contexto:** hacía falta evitar que futuras iteraciones del frontend mezclaran componentes ad hoc con la base visual ya integrada, generando inconsistencia en la UI.
+**Uso de LLM:** se le pidió a Copilot agregar una regla o skill para que el trabajo de frontend use siempre shadcn/ui como base.
+**Salida del modelo:** propuso una file instruction acotada a `frontend/**/*.{ts,tsx,css}` para priorizar shadcn/ui en vistas y componentes reutilizables, manteniendo libertad para customización visual encima de esa base.
+**Mi decisión:** acepté la instrucción persistente porque el por qué explícito es sostener estandarización, velocidad de desarrollo, accesibilidad y consistencia visual sin cargar reglas innecesarias en backend.
+**Alternativa descartada:** convertirlo en skill on-demand o ponerlo como instrucción global del workspace (descartado porque esto debe aplicar siempre en frontend, pero no tiene sentido contaminar tareas no relacionadas con UI).
+
+###[Decisión] DEC-0018 - Reconstrucción total del frontend con el CLI oficial de shadcn/ui
+**Contexto:** hacía falta rehacer el frontend desde una base limpia porque la integración manual previa no era reconocida por el CLI oficial de shadcn/ui y eso bloqueaba el flujo estándar de scaffolding.
+**Uso de LLM:** se le pidió a Copilot borrar el frontend actual y reconstruirlo con la documentación oficial usando `npx shadcn@latest init -t next`.
+**Salida del modelo:** propuso limpiar el directorio `frontend/`, ejecutar el scaffold oficial de Next.js + shadcn/ui, reacomodar la salida al layout esperado del repo y restaurar Docker/ajustes del proyecto alrededor de esa nueva base.
+**Mi decisión:** acepté rehacerlo desde cero porque el por qué explícito es alinear el proyecto con el flujo oficial de shadcn/ui, reducir desviaciones manuales y dejar una base más mantenible para los siguientes componentes del frontend.
+**Alternativa descartada:** seguir iterando sobre la instalación manual anterior (descartado porque el propio CLI no la detectaba como framework soportado y eso seguía dejando una base inconsistente respecto a la documentación oficial).
