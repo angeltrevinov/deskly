@@ -160,3 +160,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso configurar `next/jest` con `jsdom`, setup global para `@testing-library/jest-dom`, scripts de test (`test`, `test:watch`, `test:coverage`) y pruebas iniciales para utilidades (`cn`), cliente API (`getTickets`) y componente `Button`.
 **Mi decisión:** acepté Jest como base de unit testing en frontend porque el por qué explícito indicado fue la preferencia de usar Jest para este tipo de pruebas y su integración directa con Next.js mediante `next/jest`.
 **Alternativa descartada:** usar Vitest para pruebas unitarias (descartado en esta etapa para respetar la preferencia de stack y evitar mezclar runners en el mismo frontend).
+
+###[Decisión] DEC-0021 - Checks de frontend obligatorios en Pull Request
+**Contexto:** hacía falta ejecutar validaciones automáticas de frontend antes del merge, similar al esquema ya aplicado en backend.
+**Uso de LLM:** se le pidió a Copilot agregar workflows para testear el código de frontend en PR antes de poder hacer merge.
+**Salida del modelo:** propuso un workflow dedicado de GitHub Actions para PR con cuatro jobs independientes: `lint`, `typecheck`, `unit tests` (Jest) y `docker build`, usando `actions/setup-node` + `npm ci` y control de concurrencia para cancelar ejecuciones anteriores del mismo PR.
+**Mi decisión:** acepté este enfoque porque el por qué explícito indicado fue tener una barrera de calidad previa al merge en frontend, igual que backend, para detectar fallos temprano y evitar merges con regresiones.
+**Alternativa descartada:** ejecutar únicamente un job de build o dejar las validaciones de frontend como ejecución manual local (descartado por menor cobertura y por no bloquear automáticamente PRs con errores).
