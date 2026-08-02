@@ -163,11 +163,13 @@ export function TicketsDashboard({
 
   const openTicket = useCallback(
     (ticketId: number) => {
+      const queryString = searchParams.toString()
+
       startTransition(() => {
-        router.push(`/tickets/${ticketId}`)
+        router.push(queryString ? `/tickets/${ticketId}?${queryString}` : `/tickets/${ticketId}`)
       })
     },
-    [router, startTransition]
+    [router, searchParams, startTransition]
   )
 
   const tableSorting = useMemo<SortingState>(() => {

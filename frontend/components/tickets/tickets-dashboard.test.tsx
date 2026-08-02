@@ -4,11 +4,12 @@ import userEvent from "@testing-library/user-event"
 import { TicketsDashboard, type DashboardQuery } from "@/components/tickets/tickets-dashboard"
 
 const push = jest.fn()
+const searchParams = new URLSearchParams("estado=en_progreso&prioridad=media&sort_by=estado&sort_order=asc&page=1&limit=10")
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
   usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => searchParams,
 }))
 
 jest.mock("@/hooks/useTicketStream", () => ({
@@ -69,6 +70,8 @@ describe("TicketsDashboard", () => {
 
     await user.click(screen.getByRole("link", { name: "Ver ticket 9" }))
 
-    expect(push).toHaveBeenCalledWith("/tickets/9")
+    expect(push).toHaveBeenCalledWith(
+      "/tickets/9?estado=en_progreso&prioridad=media&sort_by=estado&sort_order=asc&page=1&limit=10"
+    )
   })
 })

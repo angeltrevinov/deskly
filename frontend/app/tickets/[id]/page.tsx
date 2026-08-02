@@ -9,6 +9,11 @@ export const dynamic = "force-dynamic"
 
 type PageProps = {
   params?: Promise<{ id: string }> | { id: string }
+  searchParams?: Promise<Record<string, string | string[] | undefined>> | Record<string, string | string[] | undefined>
+}
+
+function firstParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value
 }
 
 function formatDate(value: string) {
@@ -130,9 +135,20 @@ function ErrorState({ message }: { message: string }) {
   )
 }
 
-export default async function TicketDetailPage({ params }: PageProps) {
+export default async function TicketDetailPage({ params, searchParams }: PageProps) {
   const resolvedParams = (await Promise.resolve(params)) as { id?: string } | undefined
+  const resolvedSearchParams = (await Promise.resolve(searchParams ?? {})) as Record<string, string | string[] | undefined>
   const ticketId = Number(resolvedParams?.id)
+  const backParams = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(resolvedSearchParams)) {
+    const normalizedValue = firstParam(value)
+    if (normalizedValue) {
+      backParams.set(key, normalizedValue)
+    }
+  }
+
+  const backHref = backParams.size > 0 ? `/?${backParams.toString()}` : "/"
 
   if (!Number.isInteger(ticketId) || ticketId < 1) {
     notFound()
@@ -168,7 +184,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
             </h1>
           </div>
           <Link
-            href="/"
+            href={backHref}
             className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-foreground transition-colors hover:bg-muted"
           >
             Volver al dashboard
