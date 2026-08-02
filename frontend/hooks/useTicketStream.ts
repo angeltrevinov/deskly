@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { getTicketsWebSocketUrl, type Ticket, type TicketCommentRead } from "@/lib/api"
 
 type BaseTicketStreamEvent = {
-  ticket_id: number
+  ticket_id: string
   emitted_at: string
 }
 
@@ -24,7 +24,7 @@ export type TicketStreamEvent = TicketCreatedOrUpdatedEvent | TicketCommentedEve
 type ConnectionStatus = "connecting" | "connected" | "reconnecting" | "disconnected"
 
 type UseTicketStreamOptions = {
-  ticketId?: number
+  ticketId?: string
   onEvent?: (event: TicketStreamEvent) => void
 }
 

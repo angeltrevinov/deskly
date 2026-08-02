@@ -8,6 +8,8 @@ import { getTicket, listTicketComments, type Ticket, type TicketCommentRead } fr
 
 export const dynamic = "force-dynamic"
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 type PageProps = {
   params?: Promise<{ id: string }> | { id: string }
   searchParams?: Promise<Record<string, string | string[] | undefined>> | Record<string, string | string[] | undefined>
@@ -20,7 +22,7 @@ function firstParam(value: string | string[] | undefined) {
 export default async function TicketDetailPage({ params, searchParams }: PageProps) {
   const resolvedParams = (await Promise.resolve(params)) as { id?: string } | undefined
   const resolvedSearchParams = (await Promise.resolve(searchParams ?? {})) as Record<string, string | string[] | undefined>
-  const ticketId = Number(resolvedParams?.id)
+  const ticketId = resolvedParams?.id
   const backParams = new URLSearchParams()
 
   for (const [key, value] of Object.entries(resolvedSearchParams)) {
@@ -32,7 +34,7 @@ export default async function TicketDetailPage({ params, searchParams }: PagePro
 
   const backHref = backParams.size > 0 ? `/?${backParams.toString()}` : "/"
 
-  if (!Number.isInteger(ticketId) || ticketId < 1) {
+  if (!ticketId || !UUID_PATTERN.test(ticketId)) {
     notFound()
   }
 

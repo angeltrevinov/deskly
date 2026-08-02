@@ -161,10 +161,16 @@ export interface components {
              * Format: date-time
              */
             creado_en: string;
-            /** Id */
-            id: number;
-            /** Ticket Id */
-            ticket_id: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Ticket Id
+             * Format: uuid
+             */
+            ticket_id: string;
         };
         /** TicketCreate */
         TicketCreate: {
@@ -198,8 +204,11 @@ export interface components {
             descripcion: string | null;
             /** Estado */
             estado: string;
-            /** Id */
-            id: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
             /** Prioridad */
             prioridad: string;
             /** Titulo */
@@ -402,7 +411,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                ticket_id: number;
+                ticket_id: string;
             };
             cookie?: never;
         };
@@ -433,7 +442,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                ticket_id: number;
+                ticket_id: string;
             };
             cookie?: never;
         };
@@ -480,7 +489,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                ticket_id: number;
+                ticket_id: string;
             };
             cookie?: never;
         };
@@ -511,7 +520,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                ticket_id: number;
+                ticket_id: string;
             };
             cookie?: never;
         };
@@ -546,7 +555,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                ticket_id: number;
+                ticket_id: string;
             };
             cookie?: never;
         };

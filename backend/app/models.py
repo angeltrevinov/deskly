@@ -1,6 +1,17 @@
 from datetime import datetime
+from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -9,7 +20,7 @@ from app.db import Base
 class TicketWorkflowState(Base):
     __tablename__ = "ticket_workflow_states"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, index=True, default=uuid4)
     codigo: Mapped[str] = mapped_column(String(32), nullable=False, unique=True, index=True)
     nombre: Mapped[str] = mapped_column(String(120), nullable=False)
     activo: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
@@ -24,13 +35,15 @@ class TicketWorkflowTransition(Base):
         UniqueConstraint("estado_origen_id", "estado_destino_id", name="uq_ticket_transition_pair"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    estado_origen_id: Mapped[int] = mapped_column(
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, index=True, default=uuid4)
+    estado_origen_id: Mapped[UUID] = mapped_column(
+        Uuid,
         ForeignKey("ticket_workflow_states.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    estado_destino_id: Mapped[int] = mapped_column(
+    estado_destino_id: Mapped[UUID] = mapped_column(
+        Uuid,
         ForeignKey("ticket_workflow_states.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -48,7 +61,7 @@ class TicketWorkflowTransition(Base):
 class Ticket(Base):
     __tablename__ = "tickets"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, index=True, default=uuid4)
     titulo: Mapped[str] = mapped_column(String(160), nullable=False)
     descripcion: Mapped[str | None] = mapped_column(Text(), nullable=True)
     prioridad: Mapped[str] = mapped_column(String(32), nullable=False, default="medium")
@@ -70,8 +83,9 @@ class Ticket(Base):
 class TicketComentario(Base):
     __tablename__ = "ticket_comentarios"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    ticket_id: Mapped[int] = mapped_column(
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, index=True, default=uuid4)
+    ticket_id: Mapped[UUID] = mapped_column(
+        Uuid,
         ForeignKey("tickets.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -88,9 +102,10 @@ class TicketComentario(Base):
 class TicketWebhookEvent(Base):
     __tablename__ = "ticket_webhook_events"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, index=True, default=uuid4)
     event_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True, index=True)
-    ticket_id: Mapped[int] = mapped_column(
+    ticket_id: Mapped[UUID] = mapped_column(
+        Uuid,
         ForeignKey("tickets.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,

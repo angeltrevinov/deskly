@@ -162,7 +162,7 @@ export function TicketsDashboard({
   }
 
   const openTicket = useCallback(
-    (ticketId: number) => {
+    (ticketId: string) => {
       const queryString = searchParams.toString()
 
       startTransition(() => {

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.db import SessionLocal
 from app.models import TicketWorkflowState, TicketWorkflowTransition
 
@@ -19,7 +21,7 @@ def test_create_and_list_tickets(client):
     assert created_ticket["prioridad"] == payload["prioridad"]
     assert created_ticket["asignado_a"] == payload["asignado_a"]
     assert created_ticket["estado"] == "abierto"
-    assert created_ticket["id"] == 1
+    UUID(created_ticket["id"])
 
     list_response = client.get("/api/tickets")
 
@@ -151,7 +153,7 @@ def test_list_tickets_with_filters_sort_and_offset(client):
         },
     ]
 
-    ticket_ids: list[int] = []
+    ticket_ids: list[str] = []
     for payload in payloads:
         response = client.post("/api/tickets", json=payload)
         assert response.status_code == 201
@@ -193,7 +195,8 @@ def test_list_tickets_with_filters_sort_and_offset(client):
     assert paginated_response.status_code == 200
     paginated_tickets = paginated_response.json()
     assert len(paginated_tickets) == 1
-    assert paginated_tickets[0]["id"] == ticket_ids[1]
+    sorted_ticket_ids = sorted(ticket_ids)
+    assert paginated_tickets[0]["id"] == sorted_ticket_ids[1]
 
 
 def test_list_tickets_with_date_filters(client):

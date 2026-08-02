@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
@@ -41,8 +42,16 @@ class SortOrder(str, Enum):
     desc = "desc"
 
 
-def get_ticket_or_404(ticket_id: int, db: Session) -> Ticket:
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+def parse_ticket_id_or_404(ticket_id: str) -> UUID:
+    try:
+        return UUID(ticket_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado") from exc
+
+
+def get_ticket_or_404(ticket_id: str, db: Session) -> Ticket:
+    parsed_ticket_id = parse_ticket_id_or_404(ticket_id)
+    ticket = db.query(Ticket).filter(Ticket.id == parsed_ticket_id).first()
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
     return ticket
@@ -51,12 +60,10 @@ def get_ticket_or_404(ticket_id: int, db: Session) -> Ticket:
 @router.websocket("/ws/tickets")
 async def tickets_ws(websocket: WebSocket) -> None:
     ticket_id_param = websocket.query_params.get("ticket_id")
-    ticket_id: int | None = None
+    ticket_id: UUID | None = None
     if ticket_id_param is not None:
         try:
-            ticket_id = int(ticket_id_param)
-            if ticket_id < 1:
-                raise ValueError
+            ticket_id = UUID(ticket_id_param)
         except ValueError:
             await websocket.close(code=1008, reason="ticket_id invalido")
             return
@@ -142,13 +149,13 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticke
 
 
 @router.get("/{ticket_id}", response_model=TicketRead)
-def get_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
+def get_ticket(ticket_id: str, db: Session = Depends(get_db)) -> Ticket:
     return get_ticket_or_404(ticket_id=ticket_id, db=db)
 
 
 @router.get("/{ticket_id}/comentarios", response_model=list[TicketCommentRead])
 def list_ticket_comments(
-    ticket_id: int,
+    ticket_id: str,
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -167,7 +174,7 @@ def list_ticket_comments(
 
 @router.post("/{ticket_id}/comentarios", response_model=TicketCommentRead, status_code=201)
 def add_ticket_comment(
-    ticket_id: int,
+    ticket_id: str,
     payload: TicketCommentCreate,
     db: Session = Depends(get_db),
 ) -> TicketComentario:
@@ -193,7 +200,7 @@ def add_ticket_comment(
     responses={409: {"model": TicketStateTransitionConflict}},
 )
 def transition_ticket_state(
-    ticket_id: int,
+    ticket_id: str,
     payload: TicketStateTransition,
     db: Session = Depends(get_db),
 ) -> Ticket | JSONResponse:
@@ -219,7 +226,7 @@ def transition_ticket_state(
     responses={409: {"model": TicketStateTransitionConflict}},
 )
 def update_ticket(
-    ticket_id: int,
+    ticket_id: str,
     payload: TicketUpdate,
     db: Session = Depends(get_db),
 ) -> Ticket | JSONResponse:

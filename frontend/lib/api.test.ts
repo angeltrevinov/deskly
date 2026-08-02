@@ -12,7 +12,7 @@ describe("getTickets", () => {
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:8000"
     const payload = [
       {
-        id: 1,
+        id: "6f95c6cb-df25-4fa2-bb83-7ce219db5087",
         titulo: "Ticket de prueba",
         descripcion: "Detalle",
         estado: "abierto",
@@ -51,8 +51,9 @@ describe("getTickets", () => {
 
   it("requests a single ticket by id", async () => {
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:8000"
+    const ticketId = "4f2c6fb2-d51d-4ba7-b703-a7a60ef9da2d"
     const payload = {
-      id: 4,
+      id: ticketId,
       titulo: "Ticket detalle",
       descripcion: "Detalle",
       estado: "abierto",
@@ -67,19 +68,20 @@ describe("getTickets", () => {
       json: async () => payload,
     } as Response)
 
-    await expect(getTicket(4)).resolves.toEqual(payload)
+    await expect(getTicket(ticketId)).resolves.toEqual(payload)
     expect(global.fetch).toHaveBeenCalledWith(
-      new URL("/api/tickets/4", "http://localhost:8000"),
+      new URL(`/api/tickets/${ticketId}`, "http://localhost:8000"),
       expect.objectContaining({ cache: "no-store" })
     )
   })
 
   it("requests ticket comments with query params", async () => {
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:8000"
+    const ticketId = "4f2c6fb2-d51d-4ba7-b703-a7a60ef9da2d"
     const payload = [
       {
-        id: 1,
-        ticket_id: 4,
+        id: "0c03297d-e4de-4d20-87bf-fa600bad07d0",
+        ticket_id: ticketId,
         contenido: "Primer comentario",
         autor: "agente@deskly.io",
         creado_en: "2026-08-01T10:15:00Z",
@@ -91,9 +93,9 @@ describe("getTickets", () => {
       json: async () => payload,
     } as Response)
 
-    await expect(listTicketComments(4, { offset: 0, limit: 50 })).resolves.toEqual(payload)
+    await expect(listTicketComments(ticketId, { offset: 0, limit: 50 })).resolves.toEqual(payload)
     expect(global.fetch).toHaveBeenCalledWith(
-      new URL("/api/tickets/4/comentarios?offset=0&limit=50", "http://localhost:8000"),
+      new URL(`/api/tickets/${ticketId}/comentarios?offset=0&limit=50`, "http://localhost:8000"),
       expect.objectContaining({ cache: "no-store" })
     )
   })

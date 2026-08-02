@@ -31,7 +31,7 @@ export function TicketCard({ ticket }: TicketCardProps) {
           </p>
         </div>
         <div className="text-left text-xs text-muted-foreground sm:text-right">
-          <p>ID {ticket.id}</p>
+          <p>Actualizado</p>
           <p>{formatDate(ticket.actualizado_en)}</p>
         </div>
       </CardContent>

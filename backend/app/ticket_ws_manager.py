@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from uuid import UUID
 
 from anyio import from_thread
 from fastapi import WebSocket
@@ -8,10 +9,10 @@ from fastapi import WebSocket
 class TicketWebSocketManager:
     def __init__(self) -> None:
         self._all_connections: set[WebSocket] = set()
-        self._ticket_connections: dict[int, set[WebSocket]] = defaultdict(set)
+        self._ticket_connections: dict[UUID, set[WebSocket]] = defaultdict(set)
         self._lock = asyncio.Lock()
 
-    async def connect(self, websocket: WebSocket, ticket_id: int | None) -> None:
+    async def connect(self, websocket: WebSocket, ticket_id: UUID | None) -> None:
         await websocket.accept()
         async with self._lock:
             if ticket_id is None:
@@ -23,7 +24,7 @@ class TicketWebSocketManager:
         async with self._lock:
             self._discard_locked(websocket)
 
-    async def emit(self, event: str, ticket_id: int, payload: dict) -> None:
+    async def emit(self, event: str, ticket_id: UUID, payload: dict) -> None:
         async with self._lock:
             recipients = set(self._all_connections)
             recipients.update(self._ticket_connections.get(ticket_id, set()))
@@ -31,7 +32,7 @@ class TicketWebSocketManager:
         dead_connections: list[WebSocket] = []
         message = {
             "event": event,
-            "ticket_id": ticket_id,
+            "ticket_id": str(ticket_id),
             "payload": payload,
         }
 
@@ -53,7 +54,7 @@ class TicketWebSocketManager:
                 all_connections.update(connections)
             return len(all_connections)
 
-    def emit_from_sync(self, event: str, ticket_id: int, payload: dict) -> None:
+    def emit_from_sync(self, event: str, ticket_id: UUID, payload: dict) -> None:
         try:
             from_thread.run(self.emit, event, ticket_id, payload)
         except RuntimeError:
@@ -68,7 +69,7 @@ class TicketWebSocketManager:
     def _discard_locked(self, websocket: WebSocket) -> None:
         self._all_connections.discard(websocket)
 
-        empty_ticket_ids: list[int] = []
+        empty_ticket_ids: list[UUID] = []
         for ticket_id, connections in self._ticket_connections.items():
             connections.discard(websocket)
             if not connections:

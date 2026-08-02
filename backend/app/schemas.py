@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 from pydantic import model_validator
@@ -32,7 +33,7 @@ class TicketUpdate(BaseModel):
 
 
 class TicketRead(BaseModel):
-    id: int
+    id: UUID
     titulo: str
     descripcion: str | None
     prioridad: str
@@ -50,8 +51,8 @@ class TicketCommentCreate(BaseModel):
 
 
 class TicketCommentRead(BaseModel):
-    id: int
-    ticket_id: int
+    id: UUID
+    ticket_id: UUID
     contenido: str
     autor: str | None
     creado_en: datetime

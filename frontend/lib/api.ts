@@ -83,13 +83,13 @@ export function getTickets() {
   return listTickets()
 }
 
-export function getTicket(ticketId: number): Promise<
+export function getTicket(ticketId: string): Promise<
   paths["/api/tickets/{ticket_id}"]["get"]["responses"][200]["content"]["application/json"]
 > {
   return apiRequest(`/tickets/${ticketId}`)
 }
 
-export function listTicketComments(ticketId: number, query?: ListTicketCommentsQuery): Promise<
+export function listTicketComments(ticketId: string, query?: ListTicketCommentsQuery): Promise<
   paths["/api/tickets/{ticket_id}/comentarios"]["get"]["responses"][200]["content"]["application/json"]
 > {
   const endpoint = new URL(`/tickets/${ticketId}/comentarios`, "http://internal")
@@ -105,7 +105,7 @@ export function listTicketComments(ticketId: number, query?: ListTicketCommentsQ
   return apiRequest(endpoint.pathname + endpoint.search)
 }
 
-export function getTicketsWebSocketUrl(ticketId?: number) {
+export function getTicketsWebSocketUrl(ticketId?: string) {
   const wsUrl = new URL("/api/tickets/ws/tickets", toWsBaseUrl(apiBaseUrl))
   if (ticketId !== undefined) {
     wsUrl.searchParams.set("ticket_id", String(ticketId))

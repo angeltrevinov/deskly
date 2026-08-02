@@ -202,3 +202,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso extraer `TicketSummary`, `TicketCommentsTimeline` y `TicketDetailErrorState` a `frontend/components/tickets/`, dejando la página SSR como ensamblador del flujo de datos y navegación.
 **Mi decisión:** acepté porque el por qué explícito fue poder reutilizar estas vistas fuera de la página actual sin duplicar markup ni estilos, manteniendo además la página de detalle más simple de leer.
 **Alternativa descartada:** mantener subcomponentes inline dentro de `page.tsx` y copiar la UI cuando hiciera falta en otro lugar (descartado por menor reutilización y por seguir mezclando composición visual con carga de datos).
+
+###[Decisión] DEC-0027 - Migrar IDs del dominio a UUID
+**Contexto:** el sistema estaba usando enteros para todos los IDs del dominio de tickets, comentarios, eventos webhook y configuración de workflow; se decidió migrarlos porque ese esquema no escala y no hay usuarios reales que bloqueen un cambio rompiente.
+**Uso de LLM:** se le pidió a Copilot apoyar en la migración de todos los IDs a UUID, no solo `ticket_id`, aceptando romper compatibilidad del contrato actual.
+**Salida del modelo:** propuso cambiar modelos SQLAlchemy, schemas Pydantic, rutas HTTP/WebSocket, tipos frontend, tests y una migración destructiva de Alembic para reconstruir el esquema con claves UUID y resincronizar el contrato OpenAPI.
+**Mi decisión:** acepté este enfoque porque el por qué explícito fue abandonar IDs enteros que no escalan y aprovechar que no hay usuarios reales para hacer una migración global consistente en una sola iteración, en lugar de convivir con dos tipos de identificador.
+**Alternativa descartada:** mantener enteros por ahora o migrar solo `Ticket.id` dejando el resto del dominio mixto (descartado por seguir propagando un contrato inconsistente y por posponer un cambio estructural ya identificado como necesario).

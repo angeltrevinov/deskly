@@ -97,7 +97,7 @@ def get_allowed_next_states(current_state: str, db: Session) -> tuple[str, ...]:
             origin_state.activo.is_(True),
             destination_state.activo.is_(True),
         )
-        .order_by(TicketWorkflowTransition.id.asc())
+        .order_by(destination_state.orden.asc(), destination_state.codigo.asc())
         .all()
     )
 
