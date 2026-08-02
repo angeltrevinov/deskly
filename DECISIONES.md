@@ -174,3 +174,17 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso extraer tres piezas (`DashboardFilters`, `DashboardTable`, `DashboardPagination`) y dejar `TicketsDashboard` como orquestador de query params, estado de conexión y navegación.
 **Mi decisión:** acepté la separación porque el por qué explícito fue legibilidad/mantenibilidad, manteniendo el mismo comportamiento visible y reduciendo complejidad del archivo principal.
 **Alternativa descartada:** mantener toda la implementación en un solo componente con helpers internos (descartado por seguir concentrando demasiada lógica en un único archivo).
+
+###[Decisión] DEC-0023 - Seed reproducible de tickets y comentarios demo
+**Contexto:** la base de datos de desarrollo puede quedar vacía y dificulta validar dashboard, filtros, ordenamiento y timeline de comentarios sin crear datos manualmente.
+**Uso de LLM:** se le pidió a Copilot crear un seed con tickets y comentarios en diferentes estados y fechas para poblar DB.
+**Salida del modelo:** propuso un script ejecutable (`python -m app.seed_data`) que inserta tickets/comentarios demo con fechas variadas, en modo idempotente por defecto, y con opción `--force-reset` para reemplazar datos existentes.
+**Mi decisión:** acepté esta estrategia porque el por qué explícito fue evitar una base vacía y habilitar validaciones funcionales rápidas del producto en desarrollo sin carga manual repetitiva.
+**Alternativa descartada:** mantener solo inserción manual desde endpoints o SQL ad-hoc (descartado por ser lento, propenso a inconsistencias y no reproducible entre entornos).
+
+###[Decisión] DEC-0024 - Seed configurable por volumen para pruebas de paginación
+**Contexto:** para validar paginación no basta un dataset pequeño; se requiere poder generar muchos tickets en algunos escenarios, pero no siempre.
+**Uso de LLM:** se le pidió a Copilot ampliar el seed para aceptar cantidad variable sin perder el modo simple por defecto.
+**Salida del modelo:** propuso agregar bandera `--count` al seed para generar N tickets (replicando plantillas con variación de fechas/títulos), manteniendo idempotencia y `--force-reset`.
+**Mi decisión:** acepté porque el por qué explícito fue poder crear volumen alto solo cuando se necesite testear paginación, sin forzar siempre una carga pesada de datos.
+**Alternativa descartada:** dejar una cantidad fija alta en el seed base (descartado por volver lento e innecesario el flujo normal de desarrollo).
