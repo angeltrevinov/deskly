@@ -33,7 +33,7 @@ class SeedTicket:
 SEED_TICKETS: list[SeedTicket] = [
     SeedTicket(
         titulo="Error de login en portal cliente",
-        descripcion="Usuarios reportan 401 intermitente al iniciar sesion en hora pico.",
+        descripcion="Usuarios reportan 401 intermitente al iniciar sesión en hora pico.",
         prioridad="alta",
         estado="abierto",
         asignado_a="soporte@deskly.io",
@@ -41,7 +41,7 @@ SEED_TICKETS: list[SeedTicket] = [
         horas_hasta_actualizacion=2,
         comentarios=[
             SeedComment(
-                contenido="Confirmado en produccion y en staging con dos cuentas de prueba.",
+                contenido="Confirmado en producción y en staging con dos cuentas de prueba.",
                 autor="agente1@deskly.io",
                 minutos_despues=25,
             ),
@@ -53,7 +53,7 @@ SEED_TICKETS: list[SeedTicket] = [
         ],
     ),
     SeedTicket(
-        titulo="Consulta de facturacion duplicada",
+        titulo="Consulta de facturación duplicada",
         descripcion="Cliente recibe dos cargos en el mismo ciclo mensual.",
         prioridad="media",
         estado="en_progreso",
@@ -62,7 +62,7 @@ SEED_TICKETS: list[SeedTicket] = [
         horas_hasta_actualizacion=12,
         comentarios=[
             SeedComment(
-                contenido="Se encontro inconsistencia entre webhook y conciliacion manual.",
+                contenido="Se encontró inconsistencia entre webhook y conciliación manual.",
                 autor="agente2@deskly.io",
                 minutos_despues=40,
             )
@@ -78,7 +78,7 @@ SEED_TICKETS: list[SeedTicket] = [
         horas_hasta_actualizacion=30,
         comentarios=[
             SeedComment(
-                contenido="Se habilito endpoint temporal con limite de 5k filas.",
+                contenido="Se habilitó endpoint temporal con límite de 5k filas.",
                 autor="backend@deskly.io",
                 minutos_despues=60,
             ),
@@ -91,7 +91,7 @@ SEED_TICKETS: list[SeedTicket] = [
     ),
     SeedTicket(
         titulo="Incidente de timeout en API externa",
-        descripcion="Integracion de pagos supera timeout y bloquea checkout.",
+        descripcion="Integración de pagos supera timeout y bloquea checkout.",
         prioridad="alta",
         estado="cerrado",
         asignado_a="integraciones@deskly.io",
@@ -99,7 +99,7 @@ SEED_TICKETS: list[SeedTicket] = [
         horas_hasta_actualizacion=8,
         comentarios=[
             SeedComment(
-                contenido="Mitigacion aplicada con reintentos exponenciales.",
+                contenido="Mitigación aplicada con reintentos exponenciales.",
                 autor="backend@deskly.io",
                 minutos_despues=50,
             ),
@@ -111,8 +111,8 @@ SEED_TICKETS: list[SeedTicket] = [
         ],
     ),
     SeedTicket(
-        titulo="Reapertura: validacion de cupones",
-        descripcion="Regresion reportada tras deploy del viernes en cupones promocionales.",
+        titulo="Reapertura: validación de cupones",
+        descripcion="Regresión reportada tras deploy del viernes en cupones promocionales.",
         prioridad="media",
         estado="reabierto",
         asignado_a=None,
@@ -165,8 +165,6 @@ def seed_database(db: Session, force_reset: bool, count: int) -> int:
     if force_reset:
         db.execute(delete(TicketComentario))
         db.execute(delete(Ticket))
-        db.commit()
-
     now = datetime.now(timezone.utc).replace(microsecond=0)
 
     inserted = 0
@@ -182,13 +180,15 @@ def seed_database(db: Session, force_reset: bool, count: int) -> int:
             hours=created_shift_hours,
             minutes=created_shift_minutes,
         )
-        actualizado_en = creado_en + timedelta(hours=template.horas_hasta_actualizacion + (index % 6))
+        actualizado_en = creado_en + timedelta(
+            hours=template.horas_hasta_actualizacion + (index % 6)
+        )
 
         titulo = template.titulo if index < len(SEED_TICKETS) else f"{template.titulo} #{index + 1}"
         descripcion = (
             template.descripcion
             if index < len(SEED_TICKETS)
-            else f"{template.descripcion} Ticket de seed para pruebas de paginacion."
+            else f"{template.descripcion} Ticket de seed para pruebas de paginación."
         )
 
         ticket = Ticket(

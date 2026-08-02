@@ -182,9 +182,9 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Mi decisión:** acepté esta estrategia porque el por qué explícito fue evitar una base vacía y habilitar validaciones funcionales rápidas del producto en desarrollo sin carga manual repetitiva.
 **Alternativa descartada:** mantener solo inserción manual desde endpoints o SQL ad-hoc (descartado por ser lento, propenso a inconsistencias y no reproducible entre entornos).
 
-###[Decisión] DEC-0024 - Seed configurable por volumen para pruebas de paginacion
-**Contexto:** para validar paginacion no basta un dataset pequeno; se requiere poder generar muchos tickets en algunos escenarios, pero no siempre.
+###[Decisión] DEC-0024 - Seed configurable por volumen para pruebas de paginación
+**Contexto:** para validar paginación no basta un dataset pequeño; se requiere poder generar muchos tickets en algunos escenarios, pero no siempre.
 **Uso de LLM:** se le pidió a Copilot ampliar el seed para aceptar cantidad variable sin perder el modo simple por defecto.
-**Salida del modelo:** propuso agregar bandera `--count` al seed para generar N tickets (replicando plantillas con variacion de fechas/titulos), manteniendo idempotencia y `--force-reset`.
-**Mi decisión:** acepté porque el por qué explícito fue poder crear volumen alto solo cuando se necesite testear paginacion, sin forzar siempre una carga pesada de datos.
+**Salida del modelo:** propuso agregar bandera `--count` al seed para generar N tickets (replicando plantillas con variación de fechas/títulos), manteniendo idempotencia y `--force-reset`.
+**Mi decisión:** acepté porque el por qué explícito fue poder crear volumen alto solo cuando se necesite testear paginación, sin forzar siempre una carga pesada de datos.
 **Alternativa descartada:** dejar una cantidad fija alta en el seed base (descartado por volver lento e innecesario el flujo normal de desarrollo).

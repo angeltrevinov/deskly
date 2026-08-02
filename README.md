@@ -136,7 +136,7 @@ Poblar la base con tickets/comentarios en distintos estados y fechas:
 docker compose run --rm backend python -m app.seed_data
 ```
 
-Generar mas volumen para probar paginacion (ejemplo 120 tickets):
+Generar más volumen para probar paginación (ejemplo 120 tickets):
 
 ```bash
 docker compose run --rm backend python -m app.seed_data --force-reset --count 120
