@@ -188,3 +188,10 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso agregar bandera `--count` al seed para generar N tickets (replicando plantillas con variación de fechas/títulos), manteniendo idempotencia y `--force-reset`.
 **Mi decisión:** acepté porque el por qué explícito fue poder crear volumen alto solo cuando se necesite testear paginación, sin forzar siempre una carga pesada de datos.
 **Alternativa descartada:** dejar una cantidad fija alta en el seed base (descartado por volver lento e innecesario el flujo normal de desarrollo).
+
+###[Decisión] DEC-0025 - Ruta SSR de detalle de ticket con comentarios
+**Contexto:** hacía falta navegar desde una fila del dashboard a una vista dedicada de ticket en `/tickets/[id]`, cargando también sus comentarios para revisar el caso completo.
+**Uso de LLM:** se le pidió a Copilot implementar la ruta F2 con SSR y hacer que el acceso ocurra dando click en la row del dashboard que representa el ticket.
+**Salida del modelo:** propuso usar los endpoints existentes de backend para resolver en el servidor el ticket y sus comentarios, crear la ruta dinámica SSR en Next.js y conectar la navegación desde la tabla del dashboard al detalle del ticket.
+**Mi decisión:** acepté este enfoque porque el por qué explícito del requerimiento fue habilitar el flujo de drill-down desde el dashboard hacia el detalle completo del ticket con comentarios, sin depender de una carga cliente posterior para ver la información principal.
+**Alternativa descartada:** abrir el detalle como vista cliente o modal cargado después del click sobre el dashboard (descartado por no cumplir tan directamente el objetivo de SSR en `/tickets/[id]` y por acoplar más lógica de detalle al dashboard).

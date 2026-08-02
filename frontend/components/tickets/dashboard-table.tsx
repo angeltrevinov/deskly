@@ -38,9 +38,10 @@ type DashboardTableProps = {
   tickets: Ticket[]
   sorting: SortingState
   onSortingChange: OnChangeFn<SortingState>
+  onTicketSelect: (ticketId: number) => void
 }
 
-export function DashboardTable({ tickets, sorting, onSortingChange }: DashboardTableProps) {
+export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSelect }: DashboardTableProps) {
   const columns = useMemo<ColumnDef<Ticket>[]>(
     () => [
       {
@@ -215,7 +216,20 @@ export function DashboardTable({ tickets, sorting, onSortingChange }: DashboardT
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow
+              key={row.id}
+              className="cursor-pointer transition-colors hover:bg-muted/40 focus-visible:bg-muted/50"
+              tabIndex={0}
+              role="link"
+              aria-label={`Ver ticket ${row.original.id}`}
+              onClick={() => onTicketSelect(row.original.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault()
+                  onTicketSelect(row.original.id)
+                }
+              }}
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
               ))}

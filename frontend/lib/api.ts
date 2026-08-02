@@ -15,6 +15,9 @@ export type SortOrder = components["schemas"]["SortOrder"]
 export type ListTicketsQuery = NonNullable<
   paths["/api/tickets"]["get"]["parameters"]["query"]
 >
+export type ListTicketCommentsQuery = NonNullable<
+  paths["/api/tickets/{ticket_id}/comentarios"]["get"]["parameters"]["query"]
+>
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
@@ -78,6 +81,28 @@ export function listTickets(query?: ListTicketsQuery): Promise<
 
 export function getTickets() {
   return listTickets()
+}
+
+export function getTicket(ticketId: number): Promise<
+  paths["/api/tickets/{ticket_id}"]["get"]["responses"][200]["content"]["application/json"]
+> {
+  return apiRequest(`/tickets/${ticketId}`)
+}
+
+export function listTicketComments(ticketId: number, query?: ListTicketCommentsQuery): Promise<
+  paths["/api/tickets/{ticket_id}/comentarios"]["get"]["responses"][200]["content"]["application/json"]
+> {
+  const endpoint = new URL(`/tickets/${ticketId}/comentarios`, "http://internal")
+
+  if (query !== undefined) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined && value !== null) {
+        endpoint.searchParams.set(key, String(value))
+      }
+    }
+  }
+
+  return apiRequest(endpoint.pathname + endpoint.search)
 }
 
 export function getTicketsWebSocketUrl(ticketId?: number) {

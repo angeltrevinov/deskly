@@ -161,6 +161,15 @@ export function TicketsDashboard({
     pushQuery({ ...query, page: Math.max(1, page) })
   }
 
+  const openTicket = useCallback(
+    (ticketId: number) => {
+      startTransition(() => {
+        router.push(`/tickets/${ticketId}`)
+      })
+    },
+    [router, startTransition]
+  )
+
   const tableSorting = useMemo<SortingState>(() => {
     if (query.sort_by === "prioridad") {
       return [{ id: "prioridad", desc: query.sort_order === "desc" }]
@@ -278,7 +287,12 @@ export function TicketsDashboard({
                 Error al actualizar: {errorMessage}
               </p>
             ) : null}
-            <DashboardTable tickets={tickets} sorting={tableSorting} onSortingChange={onSortingChange} />
+            <DashboardTable
+              tickets={tickets}
+              sorting={tableSorting}
+              onSortingChange={onSortingChange}
+              onTicketSelect={openTicket}
+            />
           </div>
         ) : null}
 
