@@ -72,7 +72,7 @@ function TicketSummary({ ticket }: { ticket: Ticket }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Asignado a</p>
           <p className="mt-1 text-sm font-medium text-foreground">{ticket.asignado_a ?? "Sin asignar"}</p>
@@ -84,10 +84,6 @@ function TicketSummary({ ticket }: { ticket: Ticket }) {
         <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
           <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Actualizado</p>
           <p className="mt-1 text-sm font-medium text-foreground">{formatDate(ticket.actualizado_en)}</p>
-        </div>
-        <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Comentarios</p>
-          <p className="mt-1 text-sm font-medium text-foreground">Timeline del ticket</p>
         </div>
       </CardContent>
     </Card>
