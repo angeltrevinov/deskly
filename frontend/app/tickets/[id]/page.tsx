@@ -1,9 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { TicketCommentsTimeline } from "@/components/tickets/ticket-comments-timeline"
 import { TicketDetailErrorState } from "@/components/tickets/ticket-detail-error-state"
-import { TicketSummary } from "@/components/tickets/ticket-summary"
+import { TicketDetailWorkbench } from "@/components/tickets/ticket-detail-workbench"
 import { getTicket, listTicketComments, type Ticket, type TicketCommentRead } from "@/lib/api"
 
 export const dynamic = "force-dynamic"
@@ -74,23 +73,31 @@ export default async function TicketDetailPage({ params, searchParams }: PagePro
               Detalle del ticket
             </h1>
           </div>
-          <Link
-            href={backHref}
-            className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            Volver al dashboard
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/tickets/editor?id=${ticketId}`}
+              className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border/60 bg-background px-2.5 text-[0.8rem] font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Editar en formulario
+            </Link>
+            <Link
+              href={backHref}
+              className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Volver al dashboard
+            </Link>
+          </div>
         </div>
 
         {ticketErrorMessage ? <TicketDetailErrorState message={ticketErrorMessage} /> : null}
-        {ticket ? <TicketSummary ticket={ticket} /> : null}
-        {commentsErrorMessage ? (
-          <TicketDetailErrorState
-            title="No se pudieron cargar los comentarios"
-            message={commentsErrorMessage}
+        {ticket ? (
+          <TicketDetailWorkbench
+            ticketId={ticketId}
+            initialTicket={ticket}
+            initialComments={comments}
+            initialCommentsError={commentsErrorMessage}
           />
         ) : null}
-        {ticket && !commentsErrorMessage ? <TicketCommentsTimeline comments={comments} /> : null}
       </main>
     </div>
   )

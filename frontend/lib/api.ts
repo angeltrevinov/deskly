@@ -22,6 +22,10 @@ export type ListTicketCommentsQuery = NonNullable<
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
 function buildApiUrl(pathname: string) {
+  if (typeof window !== "undefined") {
+    return `/api${pathname}`
+  }
+
   return new URL(`/api${pathname}`, apiBaseUrl)
 }
 
@@ -34,9 +38,20 @@ async function readApiError(response: Response) {
 
   if (contentType.includes("application/json")) {
     try {
-      const body = (await response.json()) as { detail?: string }
+      const body = (await response.json()) as {
+        detail?: string
+        mensaje?: string
+        error?: string
+      }
+
       if (typeof body.detail === "string" && body.detail.length > 0) {
         return body.detail
+      }
+      if (typeof body.mensaje === "string" && body.mensaje.length > 0) {
+        return body.mensaje
+      }
+      if (typeof body.error === "string" && body.error.length > 0) {
+        return body.error
       }
     } catch {
       return null
@@ -83,6 +98,18 @@ export function getTickets() {
   return listTickets()
 }
 
+export function createTicket(payload: TicketCreate): Promise<
+  paths["/api/tickets"]["post"]["responses"][201]["content"]["application/json"]
+> {
+  return apiRequest("/tickets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+}
+
 export function getTicket(ticketId: string): Promise<
   paths["/api/tickets/{ticket_id}"]["get"]["responses"][200]["content"]["application/json"]
 > {
@@ -103,6 +130,42 @@ export function listTicketComments(ticketId: string, query?: ListTicketCommentsQ
   }
 
   return apiRequest(endpoint.pathname + endpoint.search)
+}
+
+export function updateTicket(ticketId: string, payload: TicketUpdate): Promise<
+  paths["/api/tickets/{ticket_id}"]["patch"]["responses"][200]["content"]["application/json"]
+> {
+  return apiRequest(`/tickets/${ticketId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function transitionTicketState(ticketId: string, payload: TicketStateTransition): Promise<
+  paths["/api/tickets/{ticket_id}/transicion"]["post"]["responses"][200]["content"]["application/json"]
+> {
+  return apiRequest(`/tickets/${ticketId}/transicion`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function addTicketComment(ticketId: string, payload: TicketCommentCreate): Promise<
+  paths["/api/tickets/{ticket_id}/comentarios"]["post"]["responses"][201]["content"]["application/json"]
+> {
+  return apiRequest(`/tickets/${ticketId}/comentarios`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
 }
 
 export function getTicketsWebSocketUrl(ticketId?: string) {
