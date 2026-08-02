@@ -82,6 +82,8 @@ export function TicketEditorWorkbench({
   const [transitionState, setTransitionState] = useState(initialTicket?.estado ?? "abierto")
 
   const isEditMode = ticket !== null
+  const isOptimisticTicket = ticket?.id.startsWith("optimistic-") ?? false
+  const canComment = Boolean(ticket) && !isOptimisticTicket && !isSaving
 
   const priorityOptions = useMemo(() => {
     const baseOptions = ["alta", "media", "baja"]
@@ -220,6 +222,11 @@ export function TicketEditorWorkbench({
 
     if (!ticket) {
       setCommentError("Primero guarda el ticket para poder comentar")
+      return
+    }
+
+    if (isOptimisticTicket || isSaving) {
+      setCommentError("Espera a que el ticket termine de guardarse para comentar")
       return
     }
 
@@ -441,7 +448,7 @@ export function TicketEditorWorkbench({
                 onChange={(event) => setCommentContent(event.target.value)}
                 placeholder="Agrega una nota para el equipo"
                 maxLength={4000}
-                disabled={isCommenting || !ticket}
+                disabled={isCommenting || !canComment}
               />
             </div>
 
@@ -458,7 +465,7 @@ export function TicketEditorWorkbench({
                 onChange={(event) => setCommentAuthor(event.target.value)}
                 placeholder="tu.nombre@deskly.io"
                 maxLength={120}
-                disabled={isCommenting || !ticket}
+                disabled={isCommenting || !canComment}
               />
             </div>
 
@@ -468,7 +475,7 @@ export function TicketEditorWorkbench({
               </p>
             ) : null}
 
-            <Button type="submit" disabled={isCommenting || !ticket}>
+            <Button type="submit" disabled={isCommenting || !canComment}>
               {isCommenting ? "Guardando comentario..." : "Agregar comentario"}
             </Button>
           </form>
