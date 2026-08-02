@@ -53,7 +53,7 @@ describe("TicketsDashboard", () => {
       <TicketsDashboard
         initialTickets={[
           {
-            id: 9,
+            id: "9f9f4f40-39d7-4d02-9ba1-9836c5db7f4d",
             titulo: "Consulta de facturación duplicada",
             descripcion: "Detalle del ticket",
             estado: "en_progreso",
@@ -68,10 +68,12 @@ describe("TicketsDashboard", () => {
       />
     )
 
-    await user.click(screen.getByRole("button", { name: "Ver ticket 9" }))
+    await user.click(
+      screen.getByRole("button", { name: "Ver detalle de Consulta de facturación duplicada" })
+    )
 
     expect(push).toHaveBeenCalledWith(
-      "/tickets/9?estado=en_progreso&prioridad=media&sort_by=estado&sort_order=asc&page=1&limit=10"
+      "/tickets/9f9f4f40-39d7-4d02-9ba1-9836c5db7f4d?estado=en_progreso&prioridad=media&sort_by=estado&sort_order=asc&page=1&limit=10"
     )
   })
 })

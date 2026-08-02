@@ -72,12 +72,14 @@
             "type": "string"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
-            "type": "integer"
+            "type": "string"
           },
           "ticket_id": {
+            "format": "uuid",
             "title": "Ticket Id",
-            "type": "integer"
+            "type": "string"
           }
         },
         "required": [
@@ -173,8 +175,9 @@
             "type": "string"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
-            "type": "integer"
+            "type": "string"
           },
           "prioridad": {
             "title": "Prioridad",
@@ -724,7 +727,7 @@
             "required": true,
             "schema": {
               "title": "Ticket Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -764,7 +767,7 @@
             "required": true,
             "schema": {
               "title": "Ticket Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -826,7 +829,7 @@
             "required": true,
             "schema": {
               "title": "Ticket Id",
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -893,7 +896,7 @@
             "required": true,
             "schema": {
               "title": "Ticket Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -945,7 +948,7 @@
             "required": true,
             "schema": {
               "title": "Ticket Id",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],

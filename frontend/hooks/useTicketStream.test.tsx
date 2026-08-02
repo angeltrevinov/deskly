@@ -64,8 +64,8 @@ describe("useTicketStream", () => {
       MockWebSocket.instances[1]?.onmessage?.({
         data: JSON.stringify({
           event: "ticket.actualizado",
-          ticket_id: 12,
-          payload: { id: 12, titulo: "A", descripcion: null, prioridad: "media", estado: "abierto", asignado_a: null, creado_en: new Date().toISOString(), actualizado_en: new Date().toISOString() },
+          ticket_id: "12c5e4ca-3f6b-4c37-850f-4d27977c13c5",
+          payload: { id: "12c5e4ca-3f6b-4c37-850f-4d27977c13c5", titulo: "A", descripcion: null, prioridad: "media", estado: "abierto", asignado_a: null, creado_en: new Date().toISOString(), actualizado_en: new Date().toISOString() },
           emitted_at: new Date().toISOString(),
         }),
       })

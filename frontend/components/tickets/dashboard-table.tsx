@@ -38,7 +38,7 @@ type DashboardTableProps = {
   tickets: Ticket[]
   sorting: SortingState
   onSortingChange: OnChangeFn<SortingState>
-  onTicketSelect: (ticketId: number) => void
+  onTicketSelect: (ticketId: string) => void
 }
 
 export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSelect }: DashboardTableProps) {
@@ -59,10 +59,9 @@ export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSele
                 onTicketSelect(row.original.id)
               }}
             >
-              Ver ticket {row.original.id}
+              Ver detalle de {row.original.titulo}
             </Button>
             <p className="text-sm font-semibold text-foreground">{row.original.titulo}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">ID {row.original.id}</p>
           </div>
         ),
       },

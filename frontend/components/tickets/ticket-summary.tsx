@@ -46,9 +46,7 @@ export function TicketSummary({ ticket }: TicketSummaryProps) {
       <CardHeader className="gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Ticket #{ticket.id}
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Ticket</p>
             <CardTitle className="text-2xl tracking-tight text-foreground md:text-3xl">
               {ticket.titulo}
             </CardTitle>
