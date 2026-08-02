@@ -6,7 +6,7 @@ Create Date: 2026-08-01
 """
 
 from collections.abc import Sequence
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from alembic import op
 import sqlalchemy as sa
@@ -19,8 +19,8 @@ branch_labels: Sequence[str] | None = None
 depends_on: Sequence[str] | None = None
 
 
-def _uuid() -> str:
-    return str(uuid4())
+def _uuid() -> UUID:
+    return uuid4()
 
 
 def upgrade() -> None:
