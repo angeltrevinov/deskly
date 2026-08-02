@@ -6,6 +6,7 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-MX", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "UTC",
   }).format(new Date(value))
 }
 

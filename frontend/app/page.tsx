@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { TicketsDashboard, type DashboardQuery } from "@/components/tickets/tickets-dashboard"
 import {
   listTickets,
@@ -95,15 +97,26 @@ export default async function Page({ searchParams }: PageProps) {
     <div className="min-h-svh bg-[radial-gradient(circle_at_10%_0%,color-mix(in_oklch,var(--color-chart-1)_40%,transparent)_0%,transparent_34%),radial-gradient(circle_at_100%_0%,color-mix(in_oklch,var(--color-chart-2)_28%,transparent)_0%,transparent_36%),linear-gradient(180deg,var(--color-background)_0%,color-mix(in_oklch,var(--color-background)_90%,var(--color-muted)_10%)_100%)] p-4 md:p-8">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <section className="rounded-2xl border border-border/70 bg-background/75 p-5 shadow-sm backdrop-blur md:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Deskly Ticket Center
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            Centro de tickets
-          </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
-            Busca, filtra y ordena casos para dar seguimiento rapido a cada solicitud del equipo y de tus clientes.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Deskly Ticket Center
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+                Centro de tickets
+              </h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
+                Busca, filtra y ordena casos para dar seguimiento rapido a cada solicitud del equipo y de tus clientes.
+              </p>
+            </div>
+
+            <Link
+              href="/tickets/editor"
+              className="inline-flex h-8 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border/60 bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Crear ticket
+            </Link>
+          </div>
         </section>
 
         <TicketsDashboard initialTickets={tickets} initialQuery={initialQuery} initialErrorMessage={errorMessage} />

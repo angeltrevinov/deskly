@@ -209,3 +209,31 @@ Este archivo documenta decisiones relevantes del proyecto. El objetivo es dejar 
 **Salida del modelo:** propuso cambiar modelos SQLAlchemy, schemas Pydantic, rutas HTTP/WebSocket, tipos frontend, tests y una migración destructiva de Alembic para reconstruir el esquema con claves UUID y resincronizar el contrato OpenAPI.
 **Mi decisión:** acepté este enfoque porque el por qué explícito fue abandonar IDs enteros que no escalan y aprovechar que no hay usuarios reales para hacer una migración global consistente en una sola iteración, en lugar de convivir con dos tipos de identificador.
 **Alternativa descartada:** mantener enteros por ahora o migrar solo `Ticket.id` dejando el resto del dominio mixto (descartado por seguir propagando un contrato inconsistente y por posponer un cambio estructural ya identificado como necesario).
+
+###[Decisión] DEC-0028 - Edición de ticket y comentarios con optimistic UI en detalle
+**Contexto:** en la ruta de detalle de ticket hacía falta permitir edición y creación de comentarios con respuesta inmediata en UI, pero sin dejar el estado inconsistente cuando falle el backend.
+**Uso de LLM:** se le pidió a Copilot agregar un botón de editar en la vista de detalle y habilitar modificación de ticket + comentarios implementando optimistic UI.
+**Salida del modelo:** propuso montar un componente cliente en `/tickets/[id]` que use datos SSR iniciales, aplique cambios optimistas locales para `PATCH` de ticket y `POST` de comentario, y haga rollback automático si la petición falla.
+**Mi decisión:** acepté este enfoque porque el por qué explícito fue poder modificar tickets y agregar comentarios desde detalle con feedback inmediato, manteniendo confiabilidad mediante rollback en error.
+**Alternativa descartada:** mantener un flujo totalmente no-optimista con espera de respuesta antes de renderizar cambios (descartado por peor experiencia de uso y por no cumplir el objetivo de F4).
+
+###[Decisión] DEC-0029 - Optimistic UI solo en flujo real de tickets, sin sandbox como vía principal
+**Contexto:** se detectó que validar optimistic UI solo en sandbox no cubría el objetivo real: editar tickets existentes y comentar en la ruta productiva `/tickets/[id]`.
+**Uso de LLM:** se le pidió a Copilot mover el enfoque a flujo real y eliminar la dependencia de CORS en llamadas cliente que bloqueaban `PATCH/POST` al backend.
+**Salida del modelo:** propuso usar llamadas cliente same-origin a `/api` y configurar `rewrites` en Next.js para proxy hacia backend, manteniendo SSR y optimistic UI en la ruta real.
+**Mi decisión:** acepté porque el por qué explícito fue que el usuario necesita edición/comentarios reales sobre tickets existentes y no una demostración aislada.
+**Alternativa descartada:** mantener sandbox como validación principal del comportamiento (descartado por no reflejar el uso real solicitado).
+
+###[Decisión] DEC-0030 - Ruta única de editor real para crear y editar tickets
+**Contexto:** el flujo requerido necesita una ruta real para crear tickets nuevos y reutilizar esa misma ruta para editar tickets existentes al pasar un `id`.
+**Uso de LLM:** se le pidió a Copilot implementar una ruta de editor que soporte ambos modos y mantenga optimistic UI para crear/editar/comentar sin depender de sandbox.
+**Salida del modelo:** propuso `/tickets/editor` para crear, y `/tickets/editor?id=<uuid>` para editar, con carga SSR del ticket/comentarios cuando hay `id` y operaciones optimistas con rollback en cliente.
+**Mi decisión:** acepté porque el por qué explícito fue centralizar la edición en una experiencia real del producto, usando la misma interfaz para alta y mantenimiento de tickets.
+**Alternativa descartada:** mantener edición embebida solo en detalle o rutas separadas totalmente distintas para crear y editar (descartado por menor coherencia del flujo y mayor complejidad de navegación).
+
+###[Decisión] DEC-0031 - Cambio de estado en editor mediante endpoint de transición
+**Contexto:** en el editor real faltaba un lugar claro para cambiar el estado del ticket usando el flujo de workflow del backend; mandar `estado` por `PATCH` mezclaba edición general con transición.
+**Uso de LLM:** se le pidió a Copilot corregir dónde y cómo debía editarse el estado con `transicion`.
+**Salida del modelo:** propuso separar el estado en un bloque propio dentro del editor y consumir `/api/tickets/{id}/transicion` con optimistic UI y rollback dedicados.
+**Mi decisión:** acepté porque el por qué explícito fue que el cambio de estado debe pasar por la ruta de transición del workflow y no quedar implícito dentro de la edición general del ticket.
+**Alternativa descartada:** seguir enviando `estado` junto con el `PATCH` general del editor (descartado por ocultar la semántica de transición y mezclar dos operaciones distintas).
