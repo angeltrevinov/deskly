@@ -46,7 +46,7 @@ describe("TicketsDashboard", () => {
     expect(screen.getByText("No se pudo cargar")).toBeInTheDocument()
   })
 
-  it("navigates to ticket detail when a row is clicked", async () => {
+  it("navigates to ticket detail from the accessible button in the first cell", async () => {
     const user = userEvent.setup()
 
     render(
@@ -68,7 +68,7 @@ describe("TicketsDashboard", () => {
       />
     )
 
-    await user.click(screen.getByRole("link", { name: "Ver ticket 9" }))
+    await user.click(screen.getByRole("button", { name: "Ver ticket 9" }))
 
     expect(push).toHaveBeenCalledWith(
       "/tickets/9?estado=en_progreso&prioridad=media&sort_by=estado&sort_order=asc&page=1&limit=10"

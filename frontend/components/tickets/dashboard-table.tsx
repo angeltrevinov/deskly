@@ -49,6 +49,18 @@ export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSele
         header: "Título",
         cell: ({ row }) => (
           <div className="min-w-[220px]">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="sr-only focus:not-sr-only focus:h-auto focus:px-2 focus:py-1"
+              onClick={(event) => {
+                event.stopPropagation()
+                onTicketSelect(row.original.id)
+              }}
+            >
+              Ver ticket {row.original.id}
+            </Button>
             <p className="text-sm font-semibold text-foreground">{row.original.titulo}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">ID {row.original.id}</p>
           </div>
@@ -181,7 +193,7 @@ export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSele
         ),
       },
     ],
-    []
+    [onTicketSelect]
   )
 
   const table = useReactTable({
@@ -218,17 +230,8 @@ export function DashboardTable({ tickets, sorting, onSortingChange, onTicketSele
           {table.getRowModel().rows.map((row) => (
             <TableRow
               key={row.id}
-              className="cursor-pointer transition-colors hover:bg-muted/40 focus-visible:bg-muted/50"
-              tabIndex={0}
-              role="link"
-              aria-label={`Ver ticket ${row.original.id}`}
+              className="cursor-pointer transition-colors hover:bg-muted/40"
               onClick={() => onTicketSelect(row.original.id)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault()
-                  onTicketSelect(row.original.id)
-                }
-              }}
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
