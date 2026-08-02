@@ -9,11 +9,21 @@ export type TicketStateTransition = components["schemas"]["TicketStateTransition
 export type TicketStateTransitionConflict = components["schemas"]["TicketStateTransitionConflict"]
 export type WebhookTicketIngestRequest = components["schemas"]["WebhookTicketIngestRequest"]
 export type WebhookTicketPayload = components["schemas"]["WebhookTicketPayload"]
+export type TicketSortBy = components["schemas"]["TicketSortBy"]
+export type SortOrder = components["schemas"]["SortOrder"]
+
+export type ListTicketsQuery = NonNullable<
+  paths["/api/tickets"]["get"]["parameters"]["query"]
+>
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
 function buildApiUrl(pathname: string) {
   return new URL(`/api${pathname}`, apiBaseUrl)
+}
+
+function toWsBaseUrl(url: string) {
+  return url.replace(/^http:/, "ws:").replace(/^https:/, "wss:")
 }
 
 async function readApiError(response: Response) {
@@ -50,8 +60,30 @@ async function apiRequest<T>(pathname: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T
 }
 
-export function getTickets(): Promise<
+export function listTickets(query?: ListTicketsQuery): Promise<
   paths["/api/tickets"]["get"]["responses"][200]["content"]["application/json"]
 > {
-  return apiRequest("/tickets")
+  const endpoint = new URL("/tickets", "http://internal")
+
+  if (query !== undefined) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined && value !== null && value !== "") {
+        endpoint.searchParams.set(key, String(value))
+      }
+    }
+  }
+
+  return apiRequest(endpoint.pathname + endpoint.search)
+}
+
+export function getTickets() {
+  return listTickets()
+}
+
+export function getTicketsWebSocketUrl(ticketId?: number) {
+  const wsUrl = new URL("/api/tickets/ws/tickets", toWsBaseUrl(apiBaseUrl))
+  if (ticketId !== undefined) {
+    wsUrl.searchParams.set("ticket_id", String(ticketId))
+  }
+  return wsUrl.toString()
 }
