@@ -30,6 +30,10 @@ function SortIcon({ direction }: { direction: false | "asc" | "desc" }) {
   return <ArrowUpDown className="ml-1 size-3.5" aria-label="Sin orden" />
 }
 
+function formatStatusLabel(status: string) {
+  return status.replaceAll("_", " ")
+}
+
 type DashboardTableProps = {
   tickets: Ticket[]
   sorting: SortingState
@@ -94,7 +98,9 @@ export function DashboardTable({ tickets, sorting, onSortingChange }: DashboardT
           )
         },
         cell: ({ row }) => (
-          <span className="text-sm font-medium capitalize text-foreground">{row.original.estado}</span>
+          <span className="text-sm font-medium capitalize text-foreground">
+            {formatStatusLabel(row.original.estado)}
+          </span>
         ),
       },
       {
@@ -177,7 +183,6 @@ export function DashboardTable({ tickets, sorting, onSortingChange }: DashboardT
     []
   )
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: tickets,
     columns,

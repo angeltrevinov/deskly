@@ -128,6 +128,29 @@ Crear migracion automatica desde modelos:
 docker compose run --rm backend alembic revision --autogenerate -m "descripcion_del_cambio"
 ```
 
+## Seed de datos demo (tickets y comentarios)
+
+Poblar la base con tickets/comentarios en distintos estados y fechas:
+
+```bash
+docker compose run --rm backend python -m app.seed_data
+```
+
+Generar mas volumen para probar paginacion (ejemplo 120 tickets):
+
+```bash
+docker compose run --rm backend python -m app.seed_data --force-reset --count 120
+```
+
+Comportamiento:
+
+- Si ya hay tickets, no sobreescribe nada (sale sin cambios).
+- Para reemplazar datos actuales por el seed demo:
+
+```bash
+docker compose run --rm backend python -m app.seed_data --force-reset
+```
+
 ## Pruebas
 
 Las pruebas del backend usan PostgreSQL con variables de entorno de `.env.test`.
