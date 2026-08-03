@@ -11,9 +11,10 @@ Base minima para una app de ticketing estilo Deskly con backend en FastAPI, fron
 Pasos recomendados para levantar el proyecto desde cero:
 
 1. Verificar que no haya otro proyecto ocupando puertos 3000, 5432 o 8000.
+Si ya existe `.env.local`, usar ese mismo env file para bajar el entorno correcto.
 
 ```bash
-docker compose down --remove-orphans
+docker compose --env-file .env.local down --remove-orphans
 ```
 
 2. Preparar variables de entorno locales (si aun no existe `.env.local`).
