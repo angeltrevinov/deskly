@@ -19,14 +19,15 @@ export type ListTicketCommentsQuery = NonNullable<
   paths["/api/tickets/{ticket_id}/comentarios"]["get"]["parameters"]["query"]
 >
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+const publicApiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+const serverApiBaseUrl = process.env.SERVER_API_URL ?? publicApiBaseUrl
 
 function buildApiUrl(pathname: string) {
   if (typeof window !== "undefined") {
     return `/api${pathname}`
   }
 
-  return new URL(`/api${pathname}`, apiBaseUrl)
+  return new URL(`/api${pathname}`, serverApiBaseUrl)
 }
 
 function toWsBaseUrl(url: string) {
@@ -169,7 +170,7 @@ export function addTicketComment(ticketId: string, payload: TicketCommentCreate)
 }
 
 export function getTicketsWebSocketUrl(ticketId?: string) {
-  const wsUrl = new URL("/api/tickets/ws/tickets", toWsBaseUrl(apiBaseUrl))
+  const wsUrl = new URL("/api/tickets/ws/tickets", toWsBaseUrl(publicApiBaseUrl))
   if (ticketId !== undefined) {
     wsUrl.searchParams.set("ticket_id", String(ticketId))
   }

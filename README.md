@@ -6,10 +6,58 @@ Base minima para una app de ticketing estilo Deskly con backend en FastAPI, fron
 
 - Docker y Docker Compose
 
-## Ejecucion
+## Inicializacion del proyecto
+
+Pasos recomendados para levantar el proyecto desde cero:
+
+1. Verificar que no haya otro proyecto ocupando puertos 3000, 5432 o 8000.
+Si ya existe `.env.local`, usar ese mismo env file para bajar el entorno correcto.
 
 ```bash
-docker compose --env-file .env.local up --build
+docker compose --env-file .env.local down --remove-orphans
+```
+
+2. Preparar variables de entorno locales (si aun no existe `.env.local`).
+
+```bash
+cp .env.example .env.local
+```
+
+3. Levantar servicios con build.
+
+```bash
+docker compose --env-file .env.local up --build -d
+```
+
+4. Aplicar migraciones (obligatorio en base nueva).
+
+```bash
+docker compose --env-file .env.local run --rm backend alembic upgrade head
+```
+
+5. (Opcional) Poblar datos demo.
+
+```bash
+docker compose --env-file .env.local run --rm backend python -m app.seed_data
+```
+
+6. Validar que todo quedo arriba.
+
+```bash
+curl -sS http://localhost:8000/api/health
+curl -sS "http://localhost:8000/api/tickets?offset=0&limit=20&sort_by=creado_en&sort_order=desc"
+```
+
+Para ver logs en vivo:
+
+```bash
+docker compose --env-file .env.local logs -f
+```
+
+Para detener servicios:
+
+```bash
+docker compose --env-file .env.local down --remove-orphans
 ```
 
 Para desarrollo se usa `.env.local`.
@@ -113,19 +161,19 @@ ON CONFLICT (estado_origen_id, estado_destino_id) DO NOTHING;
 Aplicar migraciones:
 
 ```bash
-docker compose run --rm backend alembic upgrade head
+docker compose --env-file .env.local run --rm backend alembic upgrade head
 ```
 
 Crear una nueva migracion:
 
 ```bash
-docker compose run --rm backend alembic revision -m "descripcion_del_cambio"
+docker compose --env-file .env.local run --rm backend alembic revision -m "descripcion_del_cambio"
 ```
 
 Crear migracion automatica desde modelos:
 
 ```bash
-docker compose run --rm backend alembic revision --autogenerate -m "descripcion_del_cambio"
+docker compose --env-file .env.local run --rm backend alembic revision --autogenerate -m "descripcion_del_cambio"
 ```
 
 ## Seed de datos demo (tickets y comentarios)
@@ -133,13 +181,13 @@ docker compose run --rm backend alembic revision --autogenerate -m "descripcion_
 Poblar la base con tickets/comentarios en distintos estados y fechas:
 
 ```bash
-docker compose run --rm backend python -m app.seed_data
+docker compose --env-file .env.local run --rm backend python -m app.seed_data
 ```
 
 Generar más volumen para probar paginación (ejemplo 120 tickets):
 
 ```bash
-docker compose run --rm backend python -m app.seed_data --force-reset --count 120
+docker compose --env-file .env.local run --rm backend python -m app.seed_data --force-reset --count 120
 ```
 
 Comportamiento:
@@ -148,7 +196,7 @@ Comportamiento:
 - Para reemplazar datos actuales por el seed demo:
 
 ```bash
-docker compose run --rm backend python -m app.seed_data --force-reset
+docker compose --env-file .env.local run --rm backend python -m app.seed_data --force-reset
 ```
 
 ## Pruebas
